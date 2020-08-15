@@ -19,18 +19,19 @@ Furthermore, two distortion measures options can be used in each blend of GLA al
 
 The results are encoded and stored in json data files.
 
+## 4. Download this code
+* $ git clone https://github.com/sergiossc/lloyd-gla
 
-
-## 4. Required python packages
+## 5. Required aditional python packages
 * This code was made in python3.6.
 * We need of the following aditional packages: matplotlib>=3.1.3; and, numpy>=1.18.1
 
 To install these aditional packages try:
 * $ python3.6 -m pip install -r requirements.txt
 
-## 5. Running an example
-1. Edit 'profile.json' file
-* Setting up the 'profile.json' file with general parameters like this:
+
+## 6. Running an example
+1. Edit the 'profile.json' file setting up the general parameters like this:
 ```
 
     "number_of_elements": [4, 16], # Nt values 
@@ -52,7 +53,7 @@ To install these aditional packages try:
     "use_same_samples_for_all": true # Set it true (or false) if you want to use (or not) the same training samples over all trials
 ```
 
-* To this 'profile.json' file, the total number of trials is *[len(number_of_elements) x len(variance_of_samples_values) x len(distortion_measure_opts) x num_of_trials]*. Running the code with this 'profile.json' file we should get [2 x 2 x 2 x 2 x 1] = 16 trials and its respective *\*.json* result file.
+* Considering the information in 'profile.json' file, the total number of trials is *[len(number_of_elements) x len(variance_of_samples_values) x len(distortion_measure_opts) x num_of_trials]*. Running the code with this 'profile.json' we should get [2 x 2 x 2 x 2 x 1] = 16 trials and its respective *\*.json* result file.
 
 2. Running the code
 
