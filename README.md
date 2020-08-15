@@ -6,7 +6,6 @@
 ## 2. Problem description
 This code begins defining a DFT codebook with an arbitrary size *Nt*. This codebook is a *NtxNt* matrix of complex-valued. In the codebook matrix, every single line *(1xNt)* is a codeword who is orthogonal to each other. Then, *n* noisely-contaminated training samples are created from DFT codebook. With the same shape of the codewords, a sample is a *1xNt* complex valued vector. Finally, these *n* samples are presented to the Lloyd LBG algorithm who returns a quantizer of *L=Nt* levels, an histogram with the number of samples grouped by codeword, and the perform of distortion along training processes. In this toy problem, we consider as the ideal quantizer (who produces the optimum distortion) that DFT codebook originally used to produce the training samples.  
 
-![main workflow]
 (https://github.com/sergiossc/lloyd-gla/blob/master/pictures/lga_overall.png)
 
 ## 3. Implementation
