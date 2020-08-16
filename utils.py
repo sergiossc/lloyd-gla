@@ -140,7 +140,7 @@ def perform_distortion(sample, codebook_dict, metric):
 
 def lloyd_lbg(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, distortion_measure, perturbation_variance=None):
     """
-        This method runs Lloyd algorithm begining a unitary codebook and duplicate it in each round. The number of rounds is log2(num_of_levels).
+        This method implements Lloyd algorithm. There are two options of initial reconstruct alphabet: (1) begining a unitary codebook and duplicate it in each round. The number of rounds is log2(num_of_levels). And (2) randomized initial reconstruct alphabet from samples.
     """
     if initial_alphabet_opt == 'unitary_until_num_of_elements':
         cw0 = complex_average(samples) # The inicial unitary codebook is a average of all samples

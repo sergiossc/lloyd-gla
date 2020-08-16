@@ -20,6 +20,7 @@ def run_lloyd_lbg(parm):
     # Getting information from params
     num_of_elements = parm['num_of_elements']
     variance_of_samples = parm['variance_of_samples']
+    use_same_samples_for_all = d['use_same_samples_for_all']
     initial_alphabet_opt = parm['initial_alphabet_opt']
     distortion_measure_opt = parm['distortion_measure_opt']
     num_of_samples = parm['num_of_samples']
@@ -28,6 +29,7 @@ def run_lloyd_lbg(parm):
     # Saving some information on data dict to put it in json file
     data['num_of_elements'] = num_of_elements
     data['variance_of_samples'] = variance_of_samples
+    data['use_same_samples_for_all'] = use_same_samples_for_all
     data['initial_alphabet_opt'] = initial_alphabet_opt
     data['distortion_measure_opt'] = distortion_measure_opt
     data['num_of_samples'] = num_of_samples
