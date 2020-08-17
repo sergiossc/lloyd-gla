@@ -53,10 +53,19 @@ To install these aditional packages try:
     "use_same_samples_for_all": true # Set it true (or false) if you want to use (or not) the same training samples over all trials
 ```
 
-* Considering the information in 'profile.json' file, the total number of trials is *[len(number_of_elements) x len(variance_of_samples_values) x len(distortion_measure_opts) x num_of_trials]*. Running the code with this 'profile.json' we should get [2 x 2 x 2 x 2 x 1] = 16 trials and its respective *\*.json* result file.
+* Considering the information in 'profile.json' file, the total number of trials is *[len(number_of_elements) x len(variance_of_samples_values) x len(distortion_measure_opts) x num_of_trials]*. Running the code with this 'profile.json' we should get [2 x 2 x 2 x 2 x 1] = 16 trials and its respective json result file.
 
 2. Running the code
 
 Use 'lloyd.py' script to run the code:
-* $ python3.6 lloyd.py
+*  $ python3.6 lloyd.py
 
+In this code, each trial is a python process. Their results are saved in the path as specified in *results_directory*.
+
+3. Reading json results files
+To read json result files use *identifying_normal_results.py* script
+*  $ python3.6 identifying\_normal\_results.py
+
+4. Comparing final reconstruct alphabet by one trial with original DFT codebook, use *comparing_codewords.py* script
+
+*  $ python3.6 comparing\_codewords.py
