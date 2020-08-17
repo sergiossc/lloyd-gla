@@ -13,7 +13,8 @@ from utils import *
 def run_lloyd_lbg(parm):
     instance_id = uuid.uuid4()
     #instance_id = parm['instance_id']
-    json_filename = 'results/' + str(instance_id) + '.json'
+    results_dir = parm['results_directory']
+    json_filename = str(results_dir) + '/' + str(instance_id) + '.json'
 
     data = {}
     data['instance_id'] = str(instance_id)
