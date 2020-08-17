@@ -11,9 +11,8 @@ import os
 from utils import *
 
 def run_lloyd_lbg(parm):
-    instance_id = uuid.uuid4()
-    #instance_id = parm['instance_id']
-    results_dir = parm['results_directory']
+    instance_id = parm['instance_id']
+    results_dir = parm['results_dir']
     json_filename = str(results_dir) + '/' + str(instance_id) + '.json'
 
     data = {}
@@ -22,7 +21,7 @@ def run_lloyd_lbg(parm):
     # Getting information from params
     num_of_elements = parm['num_of_elements']
     variance_of_samples = parm['variance_of_samples']
-    use_same_samples_for_all = d['use_same_samples_for_all']
+    use_same_samples_for_all = parm['use_same_samples_for_all']
     initial_alphabet_opt = parm['initial_alphabet_opt']
     distortion_measure_opt = parm['distortion_measure_opt']
     num_of_samples = parm['num_of_samples']
@@ -38,14 +37,14 @@ def run_lloyd_lbg(parm):
     data['num_of_interactions'] = num_of_interactions
 
     # Setting 
-    trial_seed = np.random.randint(10, 250000)
+    trial_seed = np.random.randint(10, 500000)
     np.random.seed(trial_seed)
     data['random_seed'] = trial_seed
  
     dftcodebook = gen_dftcodebook(num_of_elements)
     data['dftcodebook'] = encode_codebook(matrix2dict(dftcodebook))
 
-    use_same_samples_for_all = d['use_same_samples_for_all']
+    #use_same_samples_for_all = d['use_same_samples_for_all']
     samples = gen_samples(dftcodebook, num_of_samples, variance_of_samples, use_same_samples_for_all)
     samples_normalized = np.array([sample/norm(sample) for sample  in samples])
 
@@ -80,16 +79,18 @@ if __name__ == '__main__':
     num_of_trials = d['num_of_trials']
     num_of_samples = d['num_of_samples']
     num_of_interactions = d['num_of_interactions']
+    results_dir = d['results_directory']
+    use_same_samples_for_all = d['use_same_samples_for_all']
 
     parms = []
     for n_elements in num_of_elements:
         for variance in variance_of_samples_values:
             for initial_alphabet_opt in initial_alphabet_opts:
                 for distortion_measure_opt in distortion_measure_opts:
-                    p = {'num_of_elements': n_elements, 'variance_of_samples': variance, 'initial_alphabet_opt':initial_alphabet_opt, 'distortion_measure_opt':distortion_measure_opt, 'num_of_samples':num_of_samples, 'num_of_interactions':num_of_interactions}
+                    p = {'num_of_elements': n_elements, 'variance_of_samples': variance, 'initial_alphabet_opt':initial_alphabet_opt, 'distortion_measure_opt':distortion_measure_opt, 'num_of_samples':num_of_samples, 'num_of_interactions':num_of_interactions, 'results_dir': results_dir, 'use_same_samples_for_all': use_same_samples_for_all}
                     for n in range(num_of_trials):
-                        #instance_id = uuid.uuid4()
-                        #p['instance_id'] = str(instance_id)
+                        instance_id = uuid.uuid4()
+                        p['instance_id'] = str(instance_id)
                         parms.append(p)
     
     print ('# of cpus: ', os.cpu_count())
@@ -97,4 +98,4 @@ if __name__ == '__main__':
     
     with concurrent.futures.ProcessPoolExecutor() as e:
         for p, r in zip(parms, e.map(run_lloyd_lbg, parms)):
-            print ('parm ' + str(p) + ' returned  ' + str(r))
+            print ('parm ' + str(p['instance_id']) + ' returned  ' + str(r))
