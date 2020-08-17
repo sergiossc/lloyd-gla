@@ -66,6 +66,7 @@ In this code, each trial is a python process. Their results are saved in the pat
 To read json result files use *identifying_normal_results.py* script
 *  $ python3.6 identifying\_normal\_results.py
 
-4. Comparing final reconstruct alphabet by one trial with original DFT codebook, use *comparing_codewords.py* script
+4. Comparing final reconstruct alphabet with original DFT codebook
+Use *comparing_codewords.py* script
 
 *  $ python3.6 comparing\_codewords.py
