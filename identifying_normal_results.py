@@ -63,7 +63,7 @@ if __name__ == '__main__':
 
         normal_vector = np.ones(num_of_levels) * (num_of_samples/num_of_levels)
 
-        if initial_alphabet_opt == 'random_from_samples' and num_of_levels == 4 and variance_of_samples == 0.01 and distortion_measure_opt == 'mse':
+        if num_of_levels == 4 and variance_of_samples == 0.01 and distortion_measure_opt == 'mse':
             sets = d['sets']
             set_vector = []
             for k, v in sets.items():
@@ -71,9 +71,10 @@ if __name__ == '__main__':
             set_vector = np.array(set_vector)
    
             norm =  np.sqrt(np.sum(np.power(np.abs(set_vector - normal_vector), 2)))
-            print ('norm: ', norm)
+            #print ('norm: ', norm)
             if norm == 0.0:
                 print ('trial file results: ', pathfile)
+                print ('initial_alphabet_opt: ', initial_alphabet_opt)
                 print ('norm: ', norm)
                 count += 1
             #print (num_of_levels)

@@ -158,6 +158,9 @@ def lloyd_lbg(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
         codebook = np.array(initial_codebook_from_samples)
         num_of_rounds = 1 # for randomized initial alphabet method only one round is necessary
 
+    else:
+        return None
+
 
     mean_distortion_by_round = {}
     current_codebook_dict = None
@@ -171,12 +174,15 @@ def lloyd_lbg(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
             codebook = duplicate_codebook(codebook, perturbation_vector)
         elif initial_alphabet_opt == 'random_from_samples':
             pass
+        else:
+            return None
 
-        codebook_dict = matrix2dict(codebook)
         samples_dict = matrix2dict(samples)
         mean_distortion_by_iteractions = np.zeros(num_of_iteractions)
 
         for n in range(num_of_iteractions):
+
+            codebook_dict = matrix2dict(codebook)
             
             sets = {}  # Storage information of partitions baised by each codewords
             for cw_id in codebook_dict.keys():
