@@ -1,0 +1,172 @@
+{
+    "instance_id": "657f9c12-bee9-49fe-a595-83e44cb73a98",
+    "num_of_elements": 4,
+    "variance_of_samples": 0.1,
+    "use_same_samples_for_all": false,
+    "initial_alphabet_opt": "random_from_samples",
+    "distortion_measure_opt": "mse",
+    "num_of_samples": 80,
+    "num_of_interactions": 2,
+    "random_seed": 287318,
+    "dftcodebook": {
+        "d4c8591b-e1c6-4843-b4cc-c7bf69b7b4ec": {
+            "complex_adjust0": [
+                1.0,
+                0.0
+            ],
+            "complex_adjust1": [
+                1.0,
+                0.0
+            ],
+            "complex_adjust2": [
+                1.0,
+                0.0
+            ],
+            "complex_adjust3": [
+                1.0,
+                0.0
+            ]
+        },
+        "35d4e335-76b9-4b77-be9a-ec6794c5d518": {
+            "complex_adjust0": [
+                1.0,
+                0.0
+            ],
+            "complex_adjust1": [
+                6.123233995736766e-17,
+                1.0
+            ],
+            "complex_adjust2": [
+                -1.0,
+                1.2246467991473532e-16
+            ],
+            "complex_adjust3": [
+                -1.8369701987210297e-16,
+                -1.0
+            ]
+        },
+        "b61f1b48-c40a-427d-a9bb-c7111ef4ef5d": {
+            "complex_adjust0": [
+                1.0,
+                0.0
+            ],
+            "complex_adjust1": [
+                -1.0,
+                1.2246467991473532e-16
+            ],
+            "complex_adjust2": [
+                1.0,
+                -2.4492935982947064e-16
+            ],
+            "complex_adjust3": [
+                -1.0,
+                3.6739403974420594e-16
+            ]
+        },
+        "3fae2fcf-43b4-4da2-b883-fbcf56529097": {
+            "complex_adjust0": [
+                1.0,
+                0.0
+            ],
+            "complex_adjust1": [
+                -1.8369701987210297e-16,
+                -1.0
+            ],
+            "complex_adjust2": [
+                -1.0,
+                3.6739403974420594e-16
+            ],
+            "complex_adjust3": [
+                5.51091059616309e-16,
+                1.0
+            ]
+        }
+    },
+    "num_of_levels": 4,
+    "lloydcodebook": {
+        "65423fe9-3ca4-4412-94c2-f41ef2b24a4d": {
+            "complex_adjust0": [
+                0.4975899186111299,
+                0.015813794926222587
+            ],
+            "complex_adjust1": [
+                0.4576980150631476,
+                -0.04187909104046545
+            ],
+            "complex_adjust2": [
+                0.5306850831236247,
+                0.1356427882520695
+            ],
+            "complex_adjust3": [
+                0.4882912034528556,
+                0.04958772734576066
+            ]
+        },
+        "fa9b48d1-2475-48ee-85dc-c4e9da1b13c8": {
+            "complex_adjust0": [
+                0.453925932100958,
+                -0.04124203643929733
+            ],
+            "complex_adjust1": [
+                0.053802702038355035,
+                0.5434051859734171
+            ],
+            "complex_adjust2": [
+                -0.48463197241095385,
+                0.10370335590202787
+            ],
+            "complex_adjust3": [
+                -0.022484333088714524,
+                -0.49793406768814863
+            ]
+        },
+        "1c09b0d2-9f55-465f-81f6-7ea7603844cb": {
+            "complex_adjust0": [
+                0.5192308866923305,
+                0.06459683147134868
+            ],
+            "complex_adjust1": [
+                0.06404551987425011,
+                -0.4120994000860671
+            ],
+            "complex_adjust2": [
+                -0.3796980701280035,
+                -0.1237727073057718
+            ],
+            "complex_adjust3": [
+                -0.03483074254740805,
+                0.6257757612293436
+            ]
+        },
+        "dffca7d2-04f6-4de5-a3cf-29cc97bc888a": {
+            "complex_adjust0": [
+                0.441591596886204,
+                0.015819024191810513
+            ],
+            "complex_adjust1": [
+                0.5459497526227313,
+                -0.044155079594520745
+            ],
+            "complex_adjust2": [
+                0.6029246093898861,
+                -0.22234059716676574
+            ],
+            "complex_adjust3": [
+                0.2757414608652808,
+                0.12549516960326182
+            ]
+        }
+    },
+    "sets": {
+        "a14a2d5b-48c3-4636-8b54-ff6f83a0d6d4": 18,
+        "959c819f-bf8a-45b2-93b3-eb2907756d7e": 23,
+        "eea083aa-1ff3-443c-aafb-8ca16396c635": 25,
+        "03d530f7-9bfe-4c83-9aa3-e7b81b1ee20f": 14
+    },
+    "mean_distortion_by_round": {
+        "1": {
+            "0": 0.5030024931691714,
+            "1": 0.5030024931691714
+        }
+    }
+}
