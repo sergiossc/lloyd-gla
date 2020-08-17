@@ -73,6 +73,6 @@ To read json result files use *identifying_normal_results.py* script
 
 4. Comparing final reconstruct alphabet with original DFT codebook
 
-Use *comparing_codewords.py* script
+Use *comparing_codewords.py* script to compares a specific final estimated codebook with the original DFT codebook
 
 *  $ python3.6 comparing\_codewords.py <trial\_results\_jsonfile.json>
