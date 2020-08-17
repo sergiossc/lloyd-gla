@@ -75,4 +75,4 @@ To read json result files use *identifying_normal_results.py* script
 
 Use *comparing_codewords.py* script
 
-*  $ python3.6 comparing\_codewords.py
+*  $ python3.6 comparing\_codewords.py <trial\_results\_jsonfile.json>
