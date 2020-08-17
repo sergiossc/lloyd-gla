@@ -16,7 +16,7 @@ def run_lloyd_lbg(parm):
     json_filename = 'results/' + str(instance_id) + '.json'
 
     data = {}
-    data['instance_id'] = instance_id
+    data['instance_id'] = str(instance_id)
 
     # Getting information from params
     num_of_elements = parm['num_of_elements']
