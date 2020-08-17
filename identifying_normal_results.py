@@ -1,6 +1,7 @@
 import uuid
 import json
 import numpy as np
+import os
 
 def check_files(prefix, episodefiles):
     pathfiles = {}
@@ -58,20 +59,24 @@ if __name__ == '__main__':
         num_of_levels = d['num_of_levels']
         num_of_samples = d['num_of_samples']
         variance_of_samples = d['variance_of_samples']
+        distortion_measure_opt = d['distortion_measure_opt']
 
         normal_vector = np.ones(num_of_levels) * (num_of_samples/num_of_levels)
 
-        if initial_alphabet_opt == 'random_from_samples' and num_of_levels == 16 and variance_of_samples == 0.1:
+        if initial_alphabet_opt == 'random_from_samples' and num_of_levels == 16 and variance_of_samples == 0.01 and distortion_measure_opt == 'mse':
             sets = d['sets']
             set_vector = []
             for k, v in sets.items():
                 set_vector.append(v)
    
             norm =  np.sqrt(np.sum(np.power(np.abs(set_vector - normal_vector), 2)))
-            if norm == 0.0:
-                #print ('trial file results: ', pathfile)
-                print ('norm: ', norm)
-                count += 1
-            print (num_of_levels)
+            #norm =  np.sqrt(np.sum(np.power(np.abs(normal_vector - normal_vector), 2)))
+            print ('norm: ', norm)
+            #if norm > 0.0 and norm < 0.5:
+            #    print ('trial file results: ', pathfile)
+            #    print ('norm: ', norm)
+            #    count += 1
+            #print (num_of_levels)
+            #count += 1
 
     print ('total # of normal distribution results:', count)
