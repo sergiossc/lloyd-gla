@@ -11,7 +11,8 @@ import os
 from utils import *
 
 def run_lloyd_lbg(parm):
-    instance_id = parm['instance_id']
+    instance_id = uuid.uuid4()
+    #instance_id = parm['instance_id']
     json_filename = 'results/' + str(instance_id) + '.json'
 
     data = {}
@@ -86,8 +87,8 @@ if __name__ == '__main__':
                 for distortion_measure_opt in distortion_measure_opts:
                     p = {'num_of_elements': n_elements, 'variance_of_samples': variance, 'initial_alphabet_opt':initial_alphabet_opt, 'distortion_measure_opt':distortion_measure_opt, 'num_of_samples':num_of_samples, 'num_of_interactions':num_of_interactions}
                     for n in range(num_of_trials):
-                        instance_id = uuid.uuid4()
-                        p['instance_id'] = str(instance_id)
+                        #instance_id = uuid.uuid4()
+                        #p['instance_id'] = str(instance_id)
                         parms.append(p)
     
     print ('# of cpus: ', os.cpu_count())

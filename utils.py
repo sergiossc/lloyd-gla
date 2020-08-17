@@ -260,3 +260,10 @@ def decode_codebook(codebook_json):
         codebook_dict[cw_id] = np.array(codeword, dtype=complex)
 
     return codebook_dict
+
+def save_training_samples(samples):
+    np.save('samples.npy', samples)
+
+def load_samples(filename):
+    samples = np.load(filename)
+    return samples
