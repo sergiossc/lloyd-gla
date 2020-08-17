@@ -87,10 +87,8 @@ if __name__ == '__main__':
         for variance in variance_of_samples_values:
             for initial_alphabet_opt in initial_alphabet_opts:
                 for distortion_measure_opt in distortion_measure_opts:
-                    p = {'num_of_elements': n_elements, 'variance_of_samples': variance, 'initial_alphabet_opt':initial_alphabet_opt, 'distortion_measure_opt':distortion_measure_opt, 'num_of_samples':num_of_samples, 'num_of_interactions':num_of_interactions, 'results_dir': results_dir, 'use_same_samples_for_all': use_same_samples_for_all}
                     for n in range(num_of_trials):
-                        instance_id = uuid.uuid4()
-                        p['instance_id'] = str(instance_id)
+                        p = {'num_of_elements': n_elements, 'variance_of_samples': variance, 'initial_alphabet_opt':initial_alphabet_opt, 'distortion_measure_opt':distortion_measure_opt, 'num_of_samples':num_of_samples, 'num_of_interactions':num_of_interactions, 'results_dir': results_dir, 'use_same_samples_for_all': use_same_samples_for_all, 'instance_id': str(uuid.uuid4())}
                         parms.append(p)
     
     print ('# of cpus: ', os.cpu_count())
