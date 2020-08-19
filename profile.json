@@ -7,5 +7,5 @@
     "num_of_samples": 80,
     "num_of_interactions": 2,
     "results_directory": "/home/snow/code/lloyd-gla/results",
-    "use_same_samples_for_all": false
+    "use_same_samples_for_all": true
 }

@@ -211,6 +211,8 @@ def lloyd_lbg(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
                         #new_cw = codebook_dict[cw_id] # Enable this line to keep the cw who has 0 samples, but for a better design it should be removed from codebook.
                         new_cw_index = np.random.randint(0, len(samples))
                         new_cw = np.array(samples[new_cw_index]) # this is more interesting: if cw had groupped any sample, get another one from samples.
+                    elif initial_alphabet_opt == 'unitary_until_num_of_elements':
+                        new_cw = codebook_dict[cw_id] # In this case, keep the same codeword. May there are a better solution... 
 
                 new_codebook_dict[cw_id] = new_cw
             codebook = dict2matrix(new_codebook_dict)
