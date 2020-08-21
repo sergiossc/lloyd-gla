@@ -107,7 +107,7 @@ def mse_distortion(sample, codebook_dict):
     min_mse = np.Inf
     min_cw_id = None
     for cw_id, cw in codebook_dict.items():
-        mse = squared_norm(cw - sample) 
+        mse = squared_norm(cw - sample)/np.size(sample)
         if mse < min_mse:
             min_mse = mse
             min_cw_id = cw_id
@@ -193,7 +193,7 @@ def lloyd_lbg(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
                 cw_id, estimated_distortion = perform_distortion(sample, codebook_dict, distortion_measure)
                 distortion = distortion + estimated_distortion
                 sets[cw_id].append(sample_id)
-            mean_distortion_by_iteractions[n] = distortion/len(2*samples) 
+            mean_distortion_by_iteractions[n] = distortion/len(samples) 
             current_codebook_dict = codebook_dict.copy()            
             # May I could get out here from interactions with a designed codebook if mean distortion variation is acceptable. Otherwise, I have to design a new codebook from sets.
 
