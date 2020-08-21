@@ -10,7 +10,7 @@ import json
 import os
 from utils import *
 
-def run_lloyd_lbg(parm):
+def run_lloyd_gla(parm):
     instance_id = parm['instance_id']
     results_dir = parm['results_dir']
     json_filename = str(results_dir) + '/' + str(instance_id) + '.json'
@@ -53,7 +53,7 @@ def run_lloyd_lbg(parm):
     data['num_of_levels'] = num_of_levels
 
     # Setup is ready! Now I can run lloyd algotihm according to the initial alphabet option chosen
-    lloydcodebook, sets, mean_distortion_by_round = lloyd_lbg(initial_alphabet_opt, samples_normalized, num_of_levels, num_of_interactions, distortion_measure_opt, variance_of_samples)
+    lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples_normalized, num_of_levels, num_of_interactions, distortion_measure_opt, variance_of_samples)
 
     data['lloydcodebook'] = encode_codebook(matrix2dict(lloydcodebook))
     data['sets'] = encode_sets(sets)
@@ -95,5 +95,5 @@ if __name__ == '__main__':
     print ('# of parms: ', len(parms))
     
     with concurrent.futures.ProcessPoolExecutor() as e:
-        for p, r in zip(parms, e.map(run_lloyd_lbg, parms)):
+        for p, r in zip(parms, e.map(run_lloyd_gla, parms)):
             print ('parm ' + str(p['instance_id']) + ' returned  ' + str(r))
