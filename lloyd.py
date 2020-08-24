@@ -36,15 +36,11 @@ def run_lloyd_gla(parm):
     data['num_of_samples'] = num_of_samples
     data['num_of_interactions'] = num_of_interactions
 
-    # Setting 
-    trial_seed = np.random.randint(10, 500000)
-    np.random.seed(trial_seed)
-    data['random_seed'] = trial_seed
- 
+
     dftcodebook = gen_dftcodebook(num_of_elements)
     data['dftcodebook'] = encode_codebook(matrix2dict(dftcodebook))
 
-    #use_same_samples_for_all = d['use_same_samples_for_all']
+    use_same_samples_for_all = d['use_same_samples_for_all']
     samples = gen_samples(dftcodebook, num_of_samples, variance_of_samples, use_same_samples_for_all)
     samples_normalized = np.array([sample/norm(sample) for sample  in samples])
 
@@ -52,6 +48,11 @@ def run_lloyd_gla(parm):
     num_of_levels = num_of_elements
     data['num_of_levels'] = num_of_levels
 
+    # Setting 
+    trial_seed = np.random.randint(10, 500000)
+    np.random.seed(trial_seed)
+    data['random_seed'] = trial_seed
+ 
     # Setup is ready! Now I can run lloyd algotihm according to the initial alphabet option chosen
     lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples_normalized, num_of_levels, num_of_interactions, distortion_measure_opt, variance_of_samples)
 
