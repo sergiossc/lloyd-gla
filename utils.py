@@ -56,6 +56,9 @@ def gen_samples(codebook, num_of_samples, variance, same_samples_for_all=True):
             noise = np.sqrt(variance/2) * (np.random.randn(1, num_coluns) + np.random.randn(1, num_coluns) * 1j)
             sample = cw + noise
             samples.append(sample)
+
+    np.random.seed(None)
+
     return np.array(samples)
 
 def complex_average(samples):
