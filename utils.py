@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import json
 
 def squared_norm(cw):
-    return np.sum(np.power(np.abs(cw), 2))
+    return np.abs(np.inner(cw.conj(), cw))
 
 def norm(cw):
     return np.sqrt(squared_norm(cw))
@@ -120,8 +120,8 @@ def gain_distortion(sample, codebook_dict):
     max_gain = -np.Inf
     max_cw_id = None
     for cw_id, cw in codebook_dict.items():
-        #gain = np.abs(np.inner(sample.conj(), cw))
-        gain = np.abs(np.inner(sample, cw))
+        gain = np.inner(sample.conj(), cw)
+        #gain = np.abs(np.inner(sample, cw))
         if gain > max_gain:
             max_gain = gain
             max_cw_id = cw_id
@@ -141,7 +141,7 @@ def perform_distortion(sample, codebook_dict, metric):
     return cw_id, distortion
 
 
-def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, distortion_measure, perturbation_variance=None):
+def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, distortion_measure, perturbation_variance=None, initial_codebook=None):
     """
         This method implements Lloyd algorithm. There are two options of initial reconstruct alphabet: (1) begining a unitary codebook and duplicate it in each round. The number of rounds is log2(num_of_levels). And (2) randomized initial reconstruct alphabet from samples.
     """
@@ -157,7 +157,10 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
         num_of_rounds = int(np.log2(num_of_levels))
 
     elif initial_alphabet_opt == 'random_from_samples':
-        initial_codebook_from_samples = [samples[i] for i in np.random.randint(0, len(samples), num_of_levels)]
+        if initial_codebook.all() != None:
+            initial_codebook_from_samples = initial_codebook 
+        else: 
+            initial_codebook_from_samples = [samples[i] for i in np.random.randint(0, len(samples), num_of_levels)]
         codebook = np.array(initial_codebook_from_samples)
         num_of_rounds = 1 # for randomized initial alphabet method only one round is necessary
 
