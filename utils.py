@@ -71,11 +71,17 @@ def mse_distortion(sample, codebook_dict):
     return min_cw_id, min_mse
 
 def gain_distortion(sample, codebook_dict):
+    """
+    Gain as cosine formula. If sample and codeword are unity vectors, inner(sample, codeword) = cos(theta). So, abs(cos(theta)) <= 1. 
+    Input: sample: a complex unitary vector with norm(sample) == 1;
+           codebook_dict: a dict of codewords. Each codeword is a unitary complex vector with norm(codeword) == 1. 
+    Output: codeword_id: uuid from codeword who produces the max_gain
+            max_gain: real-valued gain from cosine formula.
+    """
     max_gain = -np.Inf
     max_cw_id = None
     for cw_id, cw in codebook_dict.items():
-        gain = np.real(np.inner(sample.conj(), cw))
-        #gain = np.abs(np.inner(sample, cw))
+        gain = np.abs(np.inner(sample.conj(), cw))
         if gain > max_gain:
             max_gain = gain
             max_cw_id = cw_id
@@ -89,7 +95,7 @@ def perform_distortion(sample, codebook_dict, metric):
     cw_id, distortion = distortion_function(sample, codebook_dict)
     return cw_id, distortion
 
-def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, distortion_measure, perturbation_variance=None, initial_codebook=None):
+def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, distortion_measure, perturbation_variance=None):
     """
         This method implements Lloyd algorithm. There are two options of initial reconstruct alphabet: (1) begining a unitary codebook and duplicate it in each round. The number of rounds is log2(num_of_levels). And (2) randomized initial reconstruct alphabet from samples.
     """
@@ -105,12 +111,9 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
         num_of_rounds = int(np.log2(num_of_levels))
 
     elif initial_alphabet_opt == 'random_from_samples':
-        if initial_codebook.all() != None:
-            initial_codebook_from_samples = initial_codebook 
-        else: 
-            initial_codebook_from_samples = [samples[i] for i in np.random.randint(0, len(samples), num_of_levels)]
+        initial_codebook_from_samples = [samples[i] for i in np.random.randint(0, len(samples), num_of_levels)]
         codebook = np.array(initial_codebook_from_samples)
-        num_of_rounds = 1 # for randomized initial alphabet method only one round is necessary
+        num_of_rounds = 1 # for randomized initial alphabet method only one round is needed
 
     else:
         return None

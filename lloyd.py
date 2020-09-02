@@ -48,12 +48,13 @@ def run_lloyd_gla(parm):
     num_of_levels = num_of_elements
     data['num_of_levels'] = num_of_levels
 
-    # Setting 
-    trial_seed = np.random.randint(10, 500000)
+    # Choose a seed to keep a track from trial. This seed is saved on json data file.
+    trial_seed = np.random.randint(5, 500000)
     np.random.seed(trial_seed)
     data['random_seed'] = trial_seed
  
     # Setup is ready! Now I can run lloyd algotihm according to the initial alphabet option chosen
+
     lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples_normalized, num_of_levels, num_of_interactions, distortion_measure_opt, variance_of_samples)
 
     data['lloydcodebook'] = encode_codebook(matrix2dict(lloydcodebook))
@@ -73,6 +74,7 @@ if __name__ == '__main__':
         data = profile.read()
         d = json.loads(data)
 
+    # Read information from 'profile.json' file
     num_of_elements = d['number_of_elements']
     variance_of_samples_values = d['variance_of_samples_values']
     initial_alphabet_opts = d['initial_alphabet_opts']
