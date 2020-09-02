@@ -72,7 +72,6 @@ def mse_distortion(sample, codebook_dict):
 
 def gain_distortion(sample, codebook_dict):
     """
-    Gain as cosine formula. If sample and codeword are unity vectors, inner(sample, codeword) = cos(theta). So, abs(cos(theta)) <= 1. 
     Input: sample: a complex unitary vector with norm(sample) == 1;
            codebook_dict: a dict of codewords. Each codeword is a unitary complex vector with norm(codeword) == 1. 
     Output: codeword_id: uuid from codeword who produces the max_gain
