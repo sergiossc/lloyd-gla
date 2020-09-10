@@ -94,7 +94,7 @@ def perform_distortion(sample, codebook_dict, metric):
     cw_id, distortion = distortion_function(sample, codebook_dict)
     return cw_id, distortion
 
-def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, distortion_measure, perturbation_variance=None):
+def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, distortion_measure, perturbation_variance=None, initial_codebook=None):
     """
         This method implements Lloyd algorithm. There are two options of initial reconstruct alphabet: (1) begining a unitary codebook and duplicate it in each round. The number of rounds is log2(num_of_levels). And (2) randomized initial reconstruct alphabet from samples.
     """
@@ -110,10 +110,17 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
         num_of_rounds = int(np.log2(num_of_levels))
 
     elif initial_alphabet_opt == 'random_from_samples':
-        initial_codebook_from_samples = [samples[i] for i in np.random.randint(0, len(samples), num_of_levels)]
+        initial_codebook_from_samples = [samples[i] for i in np.random.choice(len(samples), num_of_levels, replace=False)]
         codebook = np.array(initial_codebook_from_samples)
         num_of_rounds = 1 # for randomized initial alphabet method only one round is needed
 
+    elif initial_alphabet_opt == 'sa':
+        if initial_codebook.all() == None:
+            codebook = np.array([samples[i] for i in np.random.choice(len(samples), num_of_levels, replace=False)])
+        else:
+            codebook = initial_codebook
+        num_of_rounds = 1 # for randomized initial alphabet method only one round is needed
+        
     else:
         return None
 
@@ -128,8 +135,11 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
             codebook = duplicate_codebook(codebook, perturbation_vector)
         elif initial_alphabet_opt == 'random_from_samples':
             pass
+        elif initial_alphabet_opt == 'sa':
+            pass
         else:
             return None
+
         samples_dict = matrix2dict(samples)
         mean_distortion_by_iteractions = np.zeros(num_of_iteractions)
 
@@ -159,9 +169,9 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
                     new_cw = complex_average(dict2matrix(sub_set_of_samples))
                     new_cw = new_cw/norm(new_cw)
                 else:
-                    if initial_alphabet_opt == 'random_from_samples':
+                    if initial_alphabet_opt == 'random_from_samples' or initial_alphabet_opt == 'sa':
                         #new_cw = codebook_dict[cw_id] # Enable this line to keep the cw who has 0 samples, but for a better design it should be removed from codebook.
-                        new_cw_index = np.random.randint(0, len(samples))
+                        new_cw_index = np.random.choice(len(samples))
                         new_cw = np.array(samples[new_cw_index]) # this is more interesting: if cw had groupped any sample, get another one from samples.
                     elif initial_alphabet_opt == 'unitary_until_num_of_elements':
                         new_cw = codebook_dict[cw_id] # In this case, keep the same codeword. May there are a better solution... 
@@ -171,7 +181,6 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
         mean_distortion_by_round[r] = mean_distortion_by_iteractions
 
     return dict2matrix(current_codebook_dict), sets,  mean_distortion_by_round
-
 
 # JSON STUFF TO ENCODE/DECODE DATA
 def encode_codebook(codebook):

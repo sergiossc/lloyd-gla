@@ -1,0 +1,12 @@
+{
+    "number_of_elements": [4],
+    "variance_of_samples_values": [0.01],
+    "initial_alphabet_opts": ["sa"],
+    "new_initial_alphabet_opts": ["random_from_samples", "unitary_until_num_of_elements", "sa"],
+    "distortion_measure_opts": ["mse"],
+    "num_of_trials": 1,
+    "num_of_samples": 8000,
+    "num_of_interactions": 20,
+    "results_directory": "/home/snow/code/lloyd-gla/results",
+    "use_same_samples_for_all": true
+}
