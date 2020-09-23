@@ -100,6 +100,7 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
     """
     if initial_alphabet_opt == 'unitary_until_num_of_elements':
         cw0 = complex_average(samples) # The inicial unitary codebook is a average of all samples
+        ##plot_unitary_codebook(cw0, 'initial_codebook.png')
         cw0_shape = np.shape(cw0)
         codebook = []    
         codebook.append(cw0)
@@ -174,13 +175,59 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
                         new_cw_index = np.random.choice(len(samples))
                         new_cw = np.array(samples[new_cw_index]) # this is more interesting: if cw had groupped any sample, get another one from samples.
                     elif initial_alphabet_opt == 'unitary_until_num_of_elements':
-                        new_cw = codebook_dict[cw_id] # In this case, keep the same codeword. May there are a better solution... 
+                        #new_cw_index = np.random.choice(len(samples))
+                        #new_cw = np.array(samples[new_cw_index]) # this is more interesting: if cw had groupped any sample, get another one from samples.
+                        #new_cw = codebook_dict[cw_id] # In this case, keep the same codeword. May there are a better solution... 
+                        new_cw = np.array(cw0)
+                        #pass
 
                 new_codebook_dict[cw_id] = new_cw
             codebook = dict2matrix(new_codebook_dict)
+        ##plot_codebook(codebook, 'codebook_from_round'+str(r)+'.png')
         mean_distortion_by_round[r] = mean_distortion_by_iteractions
 
     return dict2matrix(current_codebook_dict), sets,  mean_distortion_by_round
+
+# Some plot functions
+
+def plot_unitary_codebook(codebook, filename):
+    nrows, ncols = codebook.shape
+    fig, axes = plt.subplots(nrows, ncols, subplot_kw=dict(polar=True))
+    for col in range(ncols):
+        for row in range(nrows):
+            a = np.angle(codebook[row,col])
+            r = np.abs(codebook[row,col])
+            if nrows == 1:
+                axes[col].plot(0, 1, 'wo')
+                axes[col].plot(a, r, 'ro')
+            else:
+                axes[row, col].plot(0, 1, 'wo')
+                axes[row, col].plot(a, r, 'ro')
+    plt.savefig(filename)
+
+def plot_codebook(codebook, filename):
+    ncodewords, nrows, ncols = codebook.shape
+    fig, axes = plt.subplots(ncodewords, ncols, subplot_kw=dict(polar=True))
+    for col in range(ncols):
+        for cw in range(ncodewords):
+            a = np.angle(codebook[cw, 0, col])
+            r = np.abs(codebook[cw, 0, col])
+            axes[cw, col].plot(0, 1, 'wo')
+            axes[cw, col].plot(a, r, 'ro')
+    plt.savefig(filename)
+
+def plot_samples(samples, filename):
+    nsamples, nrows, ncols = samples.shape
+    fig, axes = plt.subplots(nrows, ncols, subplot_kw=dict(polar=True))
+
+    for n in range(nsamples):
+        for col in range(ncols):
+            a = np.angle(samples[n, 0, col])
+            r = np.abs(samples[n, 0, col])
+            axes[col].plot(a, r, 'o')
+    plt.savefig(filename)
+
+
 
 # JSON STUFF TO ENCODE/DECODE DATA
 def encode_codebook(codebook):
