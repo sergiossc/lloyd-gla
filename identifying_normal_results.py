@@ -69,17 +69,20 @@ if __name__ == '__main__':
         set_vector = np.array(set_vector)
    
         norm =  np.sqrt(np.sum(np.power(np.abs(set_vector - normal_vector), 2)))
+        if norm == 0: 
+            occurences.append(1)
+            print (pathfile)
 
         #trial_result = (initial_alphabet_opt, distortion_measure_opt, num_of_levels, variance_of_samples, norm)
         #trial_result = [(initial_alphabet_opt, distortion_measure_opt, num_of_levels, variance_of_samples, norm)]
-        trial_result = {'initial_alphabet_opt': initial_alphabet_opt, 'distortion_measure_opt': distortion_measure_opt, 'num_of_levels':num_of_levels, 'variance_of_samples':variance_of_samples}
+        #trial_result = {'initial_alphabet_opt': initial_alphabet_opt, 'distortion_measure_opt': distortion_measure_opt, 'num_of_levels':num_of_levels, 'variance_of_samples':variance_of_samples}
         #occurences = filter(filtering, trial_result)
-        for f in filters:
-            f_values = list(f.values())
-            trial_values = list(trial_result.values())
-            if f_values == trial_values:
-                print (f)
-                print (trial_result)
-                occurences.append(trial_result)
-    for occurence in occurences:
-        print(occurence)
+        #for f in filters:
+        #    f_values = list(f.values())
+        #    trial_values = list(trial_result.values())
+        #    if f_values == trial_values:
+        #        print (f)
+        #        print (trial_result)
+        #        occurences.append(trial_result)
+    #for occurence in occurences:
+    print(len(occurences))
