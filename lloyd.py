@@ -9,6 +9,7 @@ import uuid
 import json
 import os
 from utils import *
+from scipy.linalg import hadamard
 
 def run_lloyd_gla(parm):
     instance_id = parm['instance_id']
@@ -26,6 +27,7 @@ def run_lloyd_gla(parm):
     distortion_measure_opt = parm['distortion_measure_opt']
     num_of_samples = parm['num_of_samples']
     num_of_interactions = parm['num_of_interactions']
+    percentage_of_sub_samples = parm['percentage_of_sub_samples']
 
     # Saving some information on data dict to put it in json file
     data['num_of_elements'] = num_of_elements
@@ -35,35 +37,36 @@ def run_lloyd_gla(parm):
     data['distortion_measure_opt'] = distortion_measure_opt
     data['num_of_samples'] = num_of_samples
     data['num_of_interactions'] = num_of_interactions
+    data['percentage_of_sub_samples'] = percentage_of_sub_samples
 
     dftcodebook = gen_dftcodebook(num_of_elements)
 
-    xdftcodebook = np.array([cw for cw  in dftcodebook])
-    for cw in xdftcodebook:
-        print (norm(cw))
-    plot_codebook(xdftcodebook, 'xdftcodebook.png')
+    #dftcodebook = np.array([cw for cw  in dftcodebook])
+#    plot_codebook(dftcodebook, 'dftcodebook.png')
 
-    data['dftcodebook'] = encode_codebook(matrix2dict(dftcodebook))
+#    data['dftcodebook'] = encode_codebook(matrix2dict(dftcodebook))
 
+    
     use_same_samples_for_all = d['use_same_samples_for_all']
     samples = gen_samples(dftcodebook, num_of_samples, variance_of_samples, use_same_samples_for_all)
     samples_normalized = np.array([sample/norm(sample) for sample  in samples])
-    
-    plot_samples(samples_normalized, 'samples_normalized.png')
+    #samples_sorted, attr_sorted = sorted_samples(samples, 'stddev')
+
+    #plot_samples_by_stddev(attr_sorted, 'samples_sorted.png')
 
     # Here, the number of lloyd levels or reconstruction alphabet is equal to number of elements
     num_of_levels = num_of_elements
     data['num_of_levels'] = num_of_levels
 
     # Choose a seed to keep a track from trial. This seed is saved on json data file.
-    #trial_seed = np.random.randint(5, 500000)
-    trial_seed = 65639
+    trial_seed = np.random.randint(5, 500000)
+    #trial_seed = 65639
     np.random.seed(trial_seed)
     data['random_seed'] = trial_seed
  
     # Setup is ready! Now I can run lloyd algotihm according to the initial alphabet option chosen
-    lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples_normalized, num_of_levels, num_of_interactions, distortion_measure_opt, variance_of_samples)
-    plot_performance(mean_distortion_by_round, 'MSE as distortion', 'distortion.png')
+    lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples_normalized, num_of_levels, num_of_interactions, distortion_measure_opt, variance_of_samples, None, percentage_of_sub_samples)
+    #plot_performance(mean_distortion_by_round, 'MSE as distortion', 'distortion.png')
 
     data['lloydcodebook'] = encode_codebook(matrix2dict(lloydcodebook))
     data['sets'] = encode_sets(sets)
@@ -92,6 +95,7 @@ if __name__ == '__main__':
     num_of_interactions = d['num_of_interactions']
     results_dir = d['results_directory']
     use_same_samples_for_all = d['use_same_samples_for_all']
+    percentage_of_sub_samples = d['percentage_of_sub_samples']
 
     parms = []
     for n_elements in num_of_elements:
@@ -99,7 +103,7 @@ if __name__ == '__main__':
             for initial_alphabet_opt in initial_alphabet_opts:
                 for distortion_measure_opt in distortion_measure_opts:
                     for n in range(num_of_trials):
-                        p = {'num_of_elements': n_elements, 'variance_of_samples': variance, 'initial_alphabet_opt':initial_alphabet_opt, 'distortion_measure_opt':distortion_measure_opt, 'num_of_samples':num_of_samples, 'num_of_interactions':num_of_interactions, 'results_dir': results_dir, 'use_same_samples_for_all': use_same_samples_for_all, 'instance_id': str(uuid.uuid4())}
+                        p = {'num_of_elements': n_elements, 'variance_of_samples': variance, 'initial_alphabet_opt':initial_alphabet_opt, 'distortion_measure_opt':distortion_measure_opt, 'num_of_samples':num_of_samples, 'num_of_interactions':num_of_interactions, 'results_dir': results_dir, 'use_same_samples_for_all': use_same_samples_for_all, 'instance_id': str(uuid.uuid4()), 'percentage_of_sub_samples': percentage_of_sub_samples}
                         parms.append(p)
     
     print ('# of cpus: ', os.cpu_count())

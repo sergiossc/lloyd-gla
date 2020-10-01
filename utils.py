@@ -60,6 +60,41 @@ def matrix2dict(matrix):
         dict_info[id] = l
     return dict_info
 
+def sorted_samples(samples, attr='norm'):
+    nsamples, nrows, ncols = samples.shape
+    s_not_sorted = []
+
+    if attr == 'norm': #Sorted by vector norm   ??????
+        for s in samples:
+            s_norm = norm(s)
+            s_info = {}
+            s_info = {'s_norm': s_norm, 's': s}
+            s_not_sorted.append(s_info)
+
+        s_sorted = sorted(s_not_sorted, key=lambda k: k['s_norm'])
+        samples_sorted = [v['s'] for v in s_sorted]
+        attr_sorted = [v['s_norm'] for v in s_sorted]
+
+    elif attr == 'stddev':  #Sorted by Standard Deviation
+
+        s_avg = complex_average(samples)
+        for s in samples:
+            s_de_meaned = s - s_avg
+            s_stddev = norm(s_de_meaned)/np.sqrt(nsamples * ncols)
+            s_info = {}
+            s_info = {'s_stddev': s_stddev, 's': s}
+            s_not_sorted.append(s_info)
+
+        s_sorted = sorted(s_not_sorted, key=lambda k: k['s_stddev'])
+        samples_sorted = [v['s'] for v in s_sorted]
+        attr_sorted = [v['s_stddev'] for v in s_sorted]
+
+    else:
+        return -1
+
+    return np.array(samples_sorted), np.array(attr_sorted)
+
+
 def mse_distortion(sample, codebook_dict):
     min_mse = np.Inf
     min_cw_id = None
@@ -94,7 +129,7 @@ def perform_distortion(sample, codebook_dict, metric):
     cw_id, distortion = distortion_function(sample, codebook_dict)
     return cw_id, distortion
 
-def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, distortion_measure, perturbation_variance=None, initial_codebook=None):
+def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, distortion_measure, perturbation_variance=None, initial_codebook=None, percentage_of_sub_samples=None):
     """
         This method implements Lloyd algorithm. There are two options of initial reconstruct alphabet: (1) begining a unitary codebook and duplicate it in each round. The number of rounds is log2(num_of_levels). And (2) randomized initial reconstruct alphabet from samples.
     """
@@ -107,11 +142,18 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
         codebook = np.array(codebook)
 
         #This method considers a perturbation vector to duplicate the codebook on each round
-        perturbation_vector = np.sqrt(perturbation_variance/2) * (np.random.randn(cw0_shape[0], cw0_shape[1]) + 1j * np.random.randn(cw0_shape[0], cw0_shape[1]))
-        print ('perturbation_vector:\n')
-        print (perturbation_vector)
+        #perturbation_vector = np.sqrt(perturbation_variance/2) * (np.random.randn(cw0_shape[0], cw0_shape[1]) + 1j * np.random.randn(cw0_shape[0], cw0_shape[1]))
+        perturbation_vector = np.sqrt(0.001/2) * (np.random.randn(cw0_shape[0], cw0_shape[1]) + 1j * np.random.randn(cw0_shape[0], cw0_shape[1]))
+        #print ('perturbation_vector:\n')
+        #print (perturbation_vector)
 
         num_of_rounds = int(np.log2(num_of_levels))
+
+        #nsamples, nrows, ncols = samples_sorted.shape
+        #p = int(nsamples/num_of_rounds)
+        #samples_start = 0
+        #samples_end = p
+        
 
     elif initial_alphabet_opt == 'random_from_samples':
         initial_codebook_from_samples = [samples[i] for i in np.random.choice(len(samples), num_of_levels, replace=False)]
@@ -137,7 +179,10 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
     for r in range(1, num_of_rounds+1):
         if initial_alphabet_opt == 'unitary_until_num_of_elements':
             codebook = duplicate_codebook(codebook, perturbation_vector)
-            plot_codebook(codebook, 'duplicated_codebook_from_round'+str(r)+'.png')
+            #plot_codebook(codebook, 'duplicated_codebook_from_round'+str(r)+'.png')
+            #samples = samples_sorted[samples_start:samples_end]
+            #samples_start = samples_start + p 
+            #samples_end = samples_end + p
         elif initial_alphabet_opt == 'random_from_samples':
             pass
         elif initial_alphabet_opt == 'sa':
@@ -159,19 +204,33 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
             for sample_id, sample in samples_dict.items():
                 cw_id, estimated_distortion = perform_distortion(sample, codebook_dict, distortion_measure)
                 distortion = distortion + estimated_distortion
-                sets[cw_id].append(sample_id)
+                sample_info = {'sample_id': sample_id, 'est_distortion': estimated_distortion}
+                #sets[cw_id].append(sample_id)
+                sets[cw_id].append(sample_info)
             mean_distortion_by_iteractions[n] = distortion/len(samples) 
             current_codebook_dict = codebook_dict.copy()            
             # May I could get out here from interactions with a designed codebook if mean distortion variation is acceptable. Otherwise, I have to design a new codebook from sets.
 
             # Designing a new codebook from sets
             new_codebook_dict = {}
-            for cw_id, samples_id_list in sets.items():
-                if len(samples_id_list) > 0:
+            for cw_id, samples_info_list in sets.items():
+                if len(samples_info_list) > 0:
+                    samples_sorted = sorted(samples_info_list, key=lambda k: k['est_distortion'])
+                    #print ([sample_info['est_distortion'] for sample_info in samples_sorted])
                     sub_set_of_samples = {}
-                    for sample_id in samples_id_list:
+                    for sample_info in samples_sorted:
+                        sample_id = sample_info['sample_id']
                         sub_set_of_samples[sample_id] = samples_dict[sample_id]
-                    new_cw = complex_average(dict2matrix(sub_set_of_samples))
+                    if len(sub_set_of_samples) > 2:
+                        sub_set_of_samples_matrix = dict2matrix(sub_set_of_samples) 
+                        start = 0
+                        if percentage_of_sub_samples is None:
+                            percentage_of_sub_samples = 1 # Ex.: 0.8 is 80% of subsamples
+                        end = int(len(sub_set_of_samples) * percentage_of_sub_samples)
+                        new_cw = complex_average(sub_set_of_samples_matrix[start:end])
+                    else:
+                        new_cw = complex_average(dict2matrix(sub_set_of_samples))
+      
                     new_cw = new_cw/norm(new_cw)
                 else:
                     if initial_alphabet_opt == 'random_from_samples' or initial_alphabet_opt == 'sa':
@@ -220,7 +279,7 @@ def plot_codebook(codebook, filename):
             axes[cw, col].plot(a, r, 'ro')
     plt.savefig(filename)
 
-def plot_samples(samples, filename):
+def plot_polar_samples(samples, filename):
     nsamples, nrows, ncols = samples.shape
     fig, axes = plt.subplots(nrows, ncols, subplot_kw=dict(polar=True))
 
@@ -229,6 +288,14 @@ def plot_samples(samples, filename):
             a = np.angle(samples[n, 0, col])
             r = np.abs(samples[n, 0, col])
             axes[col].plot(a, r, 'o')
+    plt.savefig(filename)
+
+def plot_samples_by_stddev(samples, filename):
+    fig, ax = plt.subplots()
+    nsamples, nrows, ncols = samples.shape
+    #x = np.arange(nsamples)
+    #y = samples
+    ax.scatter(x=np.arange(nsamples), y=samples, marker='o', c='r', edgecolor='b')
     plt.savefig(filename)
 
 
