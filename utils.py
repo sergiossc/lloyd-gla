@@ -135,15 +135,15 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
     """
     if initial_alphabet_opt == 'unitary_until_num_of_elements':
         cw0 = complex_average(samples) # The inicial unitary codebook is a average of all samples
-        plot_unitary_codebook(cw0, 'initial_codebook.png')
+        #plot_unitary_codebook(cw0, 'initial_codebook.png')
         cw0_shape = np.shape(cw0)
         codebook = []    
         codebook.append(cw0)
         codebook = np.array(codebook)
 
         #This method considers a perturbation vector to duplicate the codebook on each round
-        #perturbation_vector = np.sqrt(perturbation_variance/2) * (np.random.randn(cw0_shape[0], cw0_shape[1]) + 1j * np.random.randn(cw0_shape[0], cw0_shape[1]))
-        perturbation_vector = np.sqrt(0.001/2) * (np.random.randn(cw0_shape[0], cw0_shape[1]) + 1j * np.random.randn(cw0_shape[0], cw0_shape[1]))
+        perturbation_vector = np.sqrt(perturbation_variance/2) * (np.random.randn(cw0_shape[0], cw0_shape[1]) + 1j * np.random.randn(cw0_shape[0], cw0_shape[1]))
+        #perturbation_vector = np.sqrt(0.001/2) * (np.random.randn(cw0_shape[0], cw0_shape[1]) + 1j * np.random.randn(cw0_shape[0], cw0_shape[1]))
         #print ('perturbation_vector:\n')
         #print (perturbation_vector)
 
@@ -246,7 +246,7 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
 
                 new_codebook_dict[cw_id] = new_cw
             codebook = dict2matrix(new_codebook_dict)
-        plot_codebook(codebook, 'designed_codebook_from_round'+str(r)+'.png')
+        #plot_codebook(codebook, 'designed_codebook_from_round'+str(r)+'.png')
         mean_distortion_by_round[r] = mean_distortion_by_iteractions
 
     return dict2matrix(current_codebook_dict), sets,  mean_distortion_by_round
