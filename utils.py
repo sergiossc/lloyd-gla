@@ -166,7 +166,25 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
         else:
             codebook = initial_codebook
         num_of_rounds = 1 # for randomized initial alphabet method only one round is needed
-        
+       
+    elif initial_alphabet_opt == 'from_ordered_samples':
+        samples_sorted, attr_sorted = sorted_samples(samples, 'stddev')
+        samples = samples_sorted
+        num_of_rounds = 1
+
+        nsamples, nrows, ncols = samples.shape
+        p = int(nsamples/num_of_levels)
+
+        index_codebook_list = []
+
+        for n_level in range(num_of_levels):
+            start = n_level * p
+            end = start + p
+            index_codebook_list.append(int((start+end)/2))
+
+        codebook = np.array([samples[i] for i in index_codebook_list])
+ 
+ 
     else:
         return None
 
@@ -186,6 +204,8 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
         elif initial_alphabet_opt == 'random_from_samples':
             pass
         elif initial_alphabet_opt == 'sa':
+            pass
+        elif initial_alphabet_opt == 'from_ordered_samples':
             pass
         else:
             return None
