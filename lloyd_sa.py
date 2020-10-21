@@ -64,10 +64,10 @@ def run_lloyd_gla(parm):
     if initial_alphabet_opt == 'sa':
         initial_codebook = np.array([samples_normalized[i] for i in np.random.choice(len(samples), num_of_levels, replace=False)])
         initial_temperature = 10
-        max_sa_num_of_iteractions = 10
+        max_sa_num_of_iteractions = 20
         lloydcodebook, sets, mean_distortion_by_round = sa(initial_codebook, variance_of_samples, initial_temperature, max_sa_num_of_iteractions, num_of_interactions, distortion_measure_opt, num_of_levels, samples_normalized)
     else:
-        lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples_normalized, num_of_levels, num_of_interactions, distortion_measure_opt, variance_of_samples, initial_codebook)
+        lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples_normalized, num_of_levels, num_of_interactions, distortion_measure_opt, variance_of_samples, initial_codebook, None)
 
     data['lloydcodebook'] = encode_codebook(matrix2dict(lloydcodebook))
     data['sets'] = encode_sets(sets)
@@ -80,7 +80,7 @@ def run_lloyd_gla(parm):
 
 def sa(initial_codebook, variance_of_samples, initial_temperature, max_iteractions, lloyd_num_of_interactions, distortion_measure_opt, num_of_levels, samples):
     
-    best_lloydcodebook, best_sets, best_mean_distortion_by_round = lloyd_gla("sa", samples, num_of_levels, lloyd_num_of_interactions, distortion_measure_opt, variance_of_samples, initial_codebook)
+    best_lloydcodebook, best_sets, best_mean_distortion_by_round = lloyd_gla("sa", samples, num_of_levels, lloyd_num_of_interactions, distortion_measure_opt, None, initial_codebook, None)
     best_mean_distortion_list = list(best_mean_distortion_by_round[1])
     best_distortion = best_mean_distortion_list[-1]
     current_temperature = initial_temperature
@@ -90,12 +90,12 @@ def sa(initial_codebook, variance_of_samples, initial_temperature, max_iteractio
         while current_iteraction < max_iteractions:
             
             candidate_codebook = gen_samples(initial_codebook, num_of_levels, variance, False)
-            candidate_lloydcodebook, candidate_sets, candidate_mean_distortion_by_round = lloyd_gla("sa", samples, num_of_levels, lloyd_num_of_interactions, distortion_measure_opt, variance_of_samples, candidate_codebook)
+            candidate_lloydcodebook, candidate_sets, candidate_mean_distortion_by_round = lloyd_gla("sa", samples, num_of_levels, lloyd_num_of_interactions, distortion_measure_opt, None, candidate_codebook, None)
             candidate_distortion_by_lloyd_interactions = list(candidate_mean_distortion_by_round[1])
             candidate_distortion = candidate_distortion_by_lloyd_interactions[-1]
 
 
-            initial_lloydcodebook, initial_sets, initial_mean_distortion_by_round = lloyd_gla("sa", samples, num_of_levels, lloyd_num_of_interactions, distortion_measure_opt, variance_of_samples, initial_codebook)
+            initial_lloydcodebook, initial_sets, initial_mean_distortion_by_round = lloyd_gla("sa", samples, num_of_levels, lloyd_num_of_interactions, distortion_measure_opt, None, initial_codebook, None)
             initial_distortion_by_lloyd_interactions = list(initial_mean_distortion_by_round[1])
             initial_distortion = initial_distortion_by_lloyd_interactions[-1]
 

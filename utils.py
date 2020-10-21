@@ -9,10 +9,16 @@ import matplotlib.pyplot as plt
 import json
 
 def squared_norm(cw):
-    return np.abs(np.inner(cw.conj(), cw))
+    """
+    Input: cw as a vector (1-dim)
+    Output: return a squared norm as a inner product of cw.conj() * cw
+    """
+    inner_product = np.sum(cw.conj() * cw)
+    return inner_product
 
-def norm(cw):
+def norm(cw): 
     return np.sqrt(squared_norm(cw))
+
 
 def gen_dftcodebook(num_of_cw):
     tx_array = np.arange(num_of_cw)
@@ -75,9 +81,38 @@ def sorted_samples(samples, attr='norm'):
         samples_sorted = [v['s'] for v in s_sorted]
         attr_sorted = [v['s_norm'] for v in s_sorted]
 
+    elif attr == 'mse': #Sorted by vector norm   ??????
+        s_avg = complex_average(samples)
+        for s in samples:
+            s_mse = norm(s-s_avg)
+            s_info = {}
+            s_info = {'s_mse': s_mse, 's': s}
+            s_not_sorted.append(s_info)
+
+        s_sorted = sorted(s_not_sorted, key=lambda k: k['s_mse'])
+        samples_sorted = [v['s'] for v in s_sorted]
+        attr_sorted = [v['s_mse'] for v in s_sorted]
+
+
+
     elif attr == 'stddev':  #Sorted by Standard Deviation
 
         s_avg = complex_average(samples)
+        for s in samples:
+            s_de_meaned = s - s_avg
+            s_stddev = norm(s_de_meaned)/np.sqrt(nsamples * ncols)
+            s_info = {}
+            s_info = {'s_stddev': s_stddev, 's': s}
+            s_not_sorted.append(s_info)
+
+        s_sorted = sorted(s_not_sorted, key=lambda k: k['s_stddev'])
+        samples_sorted = [v['s'] for v in s_sorted]
+        attr_sorted = [v['s_stddev'] for v in s_sorted]
+
+
+    elif attr == 'xiaoxiao': # From the paper
+
+        #s_avg = complex_average(samples)
         for s in samples:
             s_de_meaned = s - s_avg
             s_stddev = norm(s_de_meaned)/np.sqrt(nsamples * ncols)
@@ -167,8 +202,9 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
             codebook = initial_codebook
         num_of_rounds = 1 # for randomized initial alphabet method only one round is needed
        
-    elif initial_alphabet_opt == 'from_ordered_samples':
-        samples_sorted, attr_sorted = sorted_samples(samples, 'stddev')
+    elif initial_alphabet_opt == 'from_sorted_samples':
+        #samples_sorted, attr_sorted = sorted_samples(samples, 'stddev')
+        samples_sorted, attr_sorted = sorted_samples(samples, 'mse')
         samples = samples_sorted
         num_of_rounds = 1
 
@@ -205,7 +241,7 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
             pass
         elif initial_alphabet_opt == 'sa':
             pass
-        elif initial_alphabet_opt == 'from_ordered_samples':
+        elif initial_alphabet_opt == 'from_sorted_samples':
             pass
         else:
             return None
