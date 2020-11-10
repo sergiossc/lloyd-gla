@@ -26,16 +26,31 @@ def gen_dftcodebook(num_of_cw):
     cb = np.exp(1j * 2 * np.pi * mat/num_of_cw)
     return cb
     
+def richscatteringchnmtx(num_tx, num_rx, variance):
+    """
+    Ergodic channel. Fast, frequence non-selective channel: y_n = H_n x_n + z_n.  
+    Narrowband, MIMO channel
+    PDF model: Rich Scattering
+    Circurly Simmetric Complex Gaussian from: 
+         https://www.researchgate.net/post/How_can_I_generate_circularly_symmetric_complex_gaussian_CSCG_noise
+    """
+    sigma = variance
+    #my_seed = 2323
+    #np.random.seed(my_seed)
+    h = np.sqrt(sigma/2)*(np.random.randn(num_rx, num_tx) + np.random.randn(num_rx, num_tx) * 1j)
+    #h = np.sqrt(sigma/2)*np.random.randn(num_tx, num_rx)
+    return h
+
 def gen_samples(codebook, num_of_samples, variance, same_samples_for_all=True):
     if same_samples_for_all:
         samples_seed = 789
         np.random.seed(samples_seed)
     num_rows = np.shape(codebook)[0]
-    num_coluns = np.shape(codebook)[1]
+    num_cols = np.shape(codebook)[1]
     samples = []
     for n in range(int(num_of_samples/num_rows)):
         for cw in codebook:
-            noise = np.sqrt(variance/2) * (np.random.randn(1, num_coluns) + np.random.randn(1, num_coluns) * 1j)
+            noise = np.sqrt(variance/(2*num_cols)) * (np.random.randn(1, num_cols) + np.random.randn(1, num_cols) * 1j)
             sample = cw + noise
             samples.append(sample)
     np.random.seed(None)
@@ -72,7 +87,7 @@ def sorted_samples(samples, attr='norm'):
 
     if attr == 'norm': #Sorted by vector norm   ??????
         for s in samples:
-            s_norm = norm(s)
+            s_norm = np.abs(norm(s))
             s_info = {}
             s_info = {'s_norm': s_norm, 's': s}
             s_not_sorted.append(s_info)
@@ -100,7 +115,7 @@ def sorted_samples(samples, attr='norm'):
         s_avg = complex_average(samples)
         for s in samples:
             s_de_meaned = s - s_avg
-            s_stddev = norm(s_de_meaned)/np.sqrt(nsamples * ncols)
+            s_stddev = squared_norm(s_de_meaned)/ncols
             s_info = {}
             s_info = {'s_stddev': s_stddev, 's': s}
             s_not_sorted.append(s_info)
@@ -108,21 +123,52 @@ def sorted_samples(samples, attr='norm'):
         s_sorted = sorted(s_not_sorted, key=lambda k: k['s_stddev'])
         samples_sorted = [v['s'] for v in s_sorted]
         attr_sorted = [v['s_stddev'] for v in s_sorted]
+        var = sum(attr_sorted)/len(attr_sorted)
+        std = np.sqrt(var)
+        print ("var: ", var)
+        print ("std: ", std)
 
-
-    elif attr == 'xiaoxiao': # From the paper
+    elif attr == 'avg_xiaoxiao': # From the paper
 
         #s_avg = complex_average(samples)
         for s in samples:
-            s_de_meaned = s - s_avg
-            s_stddev = norm(s_de_meaned)/np.sqrt(nsamples * ncols)
+            num_rx, num_tx = s.shape
+            #print (num_rx, num_tx)
+            #print ("s:\n", s)
+            s_avg = np.sum(s)/num_tx
+            #print ("s_avg:\n", s_avg)
             s_info = {}
-            s_info = {'s_stddev': s_stddev, 's': s}
+            s_info = {'s_avg': np.abs(s_avg), 's': s}
             s_not_sorted.append(s_info)
 
-        s_sorted = sorted(s_not_sorted, key=lambda k: k['s_stddev'])
+        s_sorted = sorted(s_not_sorted, key=lambda k: k['s_avg'])
+        s_sorted = np.array(s_sorted) 
         samples_sorted = [v['s'] for v in s_sorted]
-        attr_sorted = [v['s_stddev'] for v in s_sorted]
+        attr_sorted = [v['s_avg'] for v in s_sorted]
+
+    elif attr == 'var_xiaoxiao': # From the paper
+
+        #s_avg = complex_average(samples)
+        for s in samples:
+            num_rx, num_tx = s.shape
+            s_avg = np.sum(s)/num_tx
+            s_demeaned = s - s_avg
+            s_stddev = np.sqrt(np.sum(s_demeaned.conj() * s_demeaned)/num_tx)
+            #cs = s.conj().T * s
+            #print ('cs:\n', cs)
+            #print ('cs.shape:\n', cs.shape)
+            #print ('cs.diagonal:\n', np.diagonal(cs))
+            #print ('np.sqrt(np.sum(cs.diagonal)/n):\n', np.sqrt(np.sum(np.diagonal(cs))/num_tx))
+            #print ('s_stddev: \n', s_stddev)
+            s_info = {}
+            s_info = {'s_var': np.abs(s_stddev), 's': s}
+            s_not_sorted.append(s_info)
+
+        s_sorted = sorted(s_not_sorted, key=lambda k: k['s_var'])
+        s_sorted = np.array(s_sorted)
+        samples_sorted = [v['s'] for v in s_sorted]
+        attr_sorted = [v['s_var'] for v in s_sorted]
+
 
     else:
         return -1
@@ -247,7 +293,7 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
             return None
 
         samples_dict = matrix2dict(samples)
-        mean_distortion_by_iteractions = np.zeros(num_of_iteractions)
+        mean_distortion_by_iteractions = [] #np.zeros(num_of_iteractions)
 
         for n in range(num_of_iteractions):
             codebook_dict = matrix2dict(codebook)
@@ -263,7 +309,11 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
                 sample_info = {'sample_id': sample_id, 'est_distortion': estimated_distortion}
                 #sets[cw_id].append(sample_id)
                 sets[cw_id].append(sample_info)
-            mean_distortion_by_iteractions[n] = distortion/len(samples) 
+            mean_distortion = distortion/len(samples) 
+            mean_distortion_by_iteractions.append(mean_distortion)
+            if (n>0) and (mean_distortion_by_iteractions[n-1] == mean_distortion_by_iteractions[n]):
+                break
+ 
             current_codebook_dict = codebook_dict.copy()            
             # May I could get out here from interactions with a designed codebook if mean distortion variation is acceptable. Otherwise, I have to design a new codebook from sets.
 
@@ -326,7 +376,10 @@ def plot_unitary_codebook(codebook, filename):
 
 def plot_codebook(codebook, filename):
     ncodewords, nrows, ncols = codebook.shape
+    #nrows, ncols = codebook.shape
     fig, axes = plt.subplots(ncodewords, ncols, subplot_kw=dict(polar=True))
+    #fig, axes = plt.subplots(1, ncols, subplot_kw=dict(polar=True))
+    #print (axes.shape)
     for col in range(ncols):
         for cw in range(ncodewords):
             a = np.angle(codebook[cw, 0, col])
@@ -346,12 +399,16 @@ def plot_polar_samples(samples, filename):
             axes[col].plot(a, r, 'o')
     plt.savefig(filename)
 
-def plot_samples_by_stddev(samples, filename):
+def plot_samples(samples, filename, title, y_label):
     fig, ax = plt.subplots()
-    nsamples, nrows, ncols = samples.shape
+    #print (samples)
+    #nsamples, nrows, ncols = samples.shape
     #x = np.arange(nsamples)
     #y = samples
-    ax.scatter(x=np.arange(nsamples), y=samples, marker='o', c='r', edgecolor='b')
+    ax.scatter(x=np.arange(len(samples)), y=np.abs(samples), marker='o', c='r', edgecolor='b')
+    ax.set_xlabel('samples')
+    ax.set_ylabel(y_label)
+    plt.title(title)
     plt.savefig(filename)
 
 

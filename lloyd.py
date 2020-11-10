@@ -29,7 +29,7 @@ def run_lloyd_gla(parm):
     num_of_interactions = parm['num_of_interactions']
     percentage_of_sub_samples = parm['percentage_of_sub_samples']
 
-    # Saving some information on data dict to put it in json file
+    # Saving some information on data dict to (in the end) put it in json file
     data['num_of_elements'] = num_of_elements
     data['variance_of_samples'] = variance_of_samples
     data['use_same_samples_for_all'] = use_same_samples_for_all
@@ -42,17 +42,75 @@ def run_lloyd_gla(parm):
     dftcodebook = gen_dftcodebook(num_of_elements)
 
     #dftcodebook = np.array([cw for cw  in dftcodebook])
-#    plot_codebook(dftcodebook, 'dftcodebook.png')
+    #plot_codebook(dftcodebook, 'dftcodebook.png')
 
-#    data['dftcodebook'] = encode_codebook(matrix2dict(dftcodebook))
+    data['dftcodebook'] = encode_codebook(matrix2dict(dftcodebook))
 
     
     use_same_samples_for_all = d['use_same_samples_for_all']
     samples = gen_samples(dftcodebook, num_of_samples, variance_of_samples, use_same_samples_for_all)
-    samples_normalized = np.array([sample/norm(sample) for sample  in samples])
+
+    
+    num_samples, num_rows, num_cols = samples.shape
+    max_norm = -np.Inf
+    max_sample_id = ''
+
+    samples_dict = matrix2dict(samples)
+
+    for s_id, s in samples_dict.items():
+        s_norm = norm(s)
+        if s_norm > max_norm:
+            max_norm = s_norm
+            max_sample_id = s_id
+    #print ('max_norm: ', max_norm)
+    #print ('max_sample_id: \n', max_sample_id)
+    
+    initial_codebook = np.zeros((num_of_elements, num_rows, num_cols), dtype=complex)
+    initial_codebook[0,:,:] = samples_dict.pop(max_sample_id) 
+    for i in range(0, num_of_elements -1):
+        cw = initial_codebook[i+1]
+        max_distance = -np.Inf
+        max_distance_sample_id = '' 
+        for s_id, s in samples_dict.items():
+            s_distance = norm(s - cw)
+            if s_distance > max_distance:
+                max_distance = s_distance
+                max_distance_sample_id = s_id
+        initial_codebook[i+1] = samples_dict.pop(max_distance_sample_id)
+    #    #print ('max_distance: ', max_distance)
+    #print ('initial_codebook: \n', initial_codebook)
+    #    max_sample = max_distance_sample
+
+
+    #plot_codebook(initial_codebook, 'initial_codebook_from_paper.png')
+
+
+
+
+
+
+
+
+
+    #samples_avg = complex_average(samples)
+
+    ##samples = [richscatteringchnmtx(num_of_elements, 1, variance_of_samples) for i in range(num_of_samples)]
+    ##samples = np.array(samples)
+    
+    #samples_normalized = np.array([sample/norm(sample) for sample  in samples])
     #samples_sorted, attr_sorted = sorted_samples(samples, 'stddev')
 
-    #plot_samples_by_stddev(attr_sorted, 'samples_sorted.png')
+    ##samples_sorted_avg, attr_sorted_avg = sorted_samples(samples, 'avg_xiaoxiao')
+    ##samples_sorted_var, attr_sorted_var = sorted_samples(samples, 'var_xiaoxiao')
+    
+    ##plot_filename_avg = 'plot_samples_avg_nt16_ordered_' + str(instance_id) + '.png'
+    ##plot_filename_var = 'plot_samples_var_nt16_ordered_' + str(instance_id) + '.png'
+
+    #plot_samples(attr_sorted_avg, plot_filename_avg, r'$abs(m_x)$', 'abs(m_x)')
+    ##plot_samples(attr_sorted_avg, plot_filename_avg, r'Samples in ascending order by $abs(m_x)$: $N_r = 1$, $N_t = 16$, $k = $' + str(num_of_samples), r'$abs(m_x)$')
+    ##plot_samples(attr_sorted_var, plot_filename_var, r'Samples in ascending order by $var_x$: $N_r = 1$, $N_t = 16$, $k = $' + str(num_of_samples), r'$var_x$')
+
+
 
     # Here, the number of lloyd levels or reconstruction alphabet is equal to number of elements
     num_of_levels = num_of_elements
@@ -65,9 +123,9 @@ def run_lloyd_gla(parm):
     data['random_seed'] = trial_seed
  
     # Setup is ready! Now I can run lloyd algotihm according to the initial alphabet option chosen
-    lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples_normalized, num_of_levels, num_of_interactions, distortion_measure_opt, variance_of_samples, None, percentage_of_sub_samples)
+    lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_interactions, distortion_measure_opt, variance_of_samples, initial_codebook, percentage_of_sub_samples)
     #plot_performance(mean_distortion_by_round, 'MSE as distortion', 'distortion.png')
-
+#
     data['lloydcodebook'] = encode_codebook(matrix2dict(lloydcodebook))
     data['sets'] = encode_sets(sets)
     data['mean_distortion_by_round'] = encode_mean_distortion(mean_distortion_by_round)
