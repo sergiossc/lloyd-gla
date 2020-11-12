@@ -46,47 +46,16 @@ def run_lloyd_gla(parm):
     #plot_codebook(dftcodebook, 'dftcodebook.png')
 
     data['dftcodebook'] = encode_codebook(matrix2dict(dftcodebook))
-
     
     use_same_samples_for_all = d['use_same_samples_for_all']
     samples = gen_samples(dftcodebook, num_of_samples, variance_of_samples, use_same_samples_for_all)
    
     num_samples, num_rows, num_cols = samples.shape
+    xiaoxiao(samples)
     
-    if use_hadamard: 
-        samples_hadamard = hadamard_transform(samples, False)
-        samples = samples_hadamard
-
-     
-    max_norm = -np.Inf
-    max_sample_id = ''
-
-    samples_dict = matrix2dict(samples)
-
-    for s_id, s in samples_dict.items():
-        s_norm = norm(s)
-        if s_norm > max_norm:
-            max_norm = s_norm
-            max_sample_id = s_id
-    #print ('max_norm: ', max_norm)
-    #print ('max_sample_id: \n', max_sample_id)
-    
-    initial_codebook = np.zeros((num_of_elements, num_rows, num_cols), dtype=complex)
-    initial_codebook[0,:,:] = samples_dict.pop(max_sample_id) 
-    for i in range(0, num_of_elements -1):
-        cw = initial_codebook[i+1]
-        max_distance = -np.Inf
-        max_distance_sample_id = '' 
-        for s_id, s in samples_dict.items():
-            s_distance = norm(s - cw)
-            if s_distance > max_distance:
-                max_distance = s_distance
-                max_distance_sample_id = s_id
-        initial_codebook[i+1] = samples_dict.pop(max_distance_sample_id)
     #    #print ('max_distance: ', max_distance)
     #print ('initial_codebook: \n', initial_codebook)
     #    max_sample = max_distance_sample
-
 
     #plot_codebook(initial_codebook, 'initial_codebook_from_paper.png')
 
@@ -114,23 +83,22 @@ def run_lloyd_gla(parm):
 
     # Choose a seed to keep a track from trial. This seed is saved on json data file.
     trial_seed = np.random.randint(5, 500000)
-    #trial_seed = 65639
     np.random.seed(trial_seed)
     data['random_seed'] = trial_seed
  
     # Setup is ready! Now I can run lloyd algotihm according to the initial alphabet option chosen
-    lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_interactions, distortion_measure_opt, variance_of_samples, initial_codebook, percentage_of_sub_samples)
+    ###lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_interactions, distortion_measure_opt, variance_of_samples, initial_codebook, percentage_of_sub_samples)
 
-    #plot_performance(mean_distortion_by_round, 'MSE as distortion', 'distortion.png')
-    if use_hadamard:
-        lloydcodebook = hadamard_transform(lloydcodebook, True)
+    ##plot_performance(mean_distortion_by_round, 'MSE as distortion', 'distortion.png')
+    ###if use_hadamard:
+    ###    lloydcodebook = hadamard_transform(lloydcodebook, True)
 
-    data['lloydcodebook'] = encode_codebook(matrix2dict(lloydcodebook))
-    data['sets'] = encode_sets(sets)
-    data['mean_distortion_by_round'] = encode_mean_distortion(mean_distortion_by_round)
+    ###data['lloydcodebook'] = encode_codebook(matrix2dict(lloydcodebook))
+    ###data['sets'] = encode_sets(sets)
+    ###data['mean_distortion_by_round'] = encode_mean_distortion(mean_distortion_by_round)
 
-    with open(json_filename, "w") as write_file:
-        json.dump(data, write_file, indent=4)
+    ###with open(json_filename, "w") as write_file:
+    ###    json.dump(data, write_file, indent=4)
 
     return 0
 

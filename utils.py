@@ -129,44 +129,35 @@ def sorted_samples(samples, attr='norm'):
         print ("var: ", var)
         print ("std: ", std)
 
-    elif attr == 'avg_xiaoxiao': # From the paper
+    elif attr == 'abs_mean_characteristic_value': # From the paper
 
-        #s_avg = complex_average(samples)
         for s in samples:
             num_rx, num_tx = s.shape
             #print (num_rx, num_tx)
             #print ("s:\n", s)
-            s_avg = np.sum(s)/num_tx
+            s_mean = np.sum(s)/num_tx
             #print ("s_avg:\n", s_avg)
             s_info = {}
-            s_info = {'s_avg': np.abs(s_avg), 's': s}
+            s_info = {'s_abs_mean': np.abs(s_mean), 's': s}
             s_not_sorted.append(s_info)
 
-        s_sorted = sorted(s_not_sorted, key=lambda k: k['s_avg'])
-        s_sorted = np.array(s_sorted) 
+        s_sorted = np.array(sorted(s_not_sorted, key=lambda k: k['s_abs_mean']))
         samples_sorted = [v['s'] for v in s_sorted]
-        attr_sorted = [v['s_avg'] for v in s_sorted]
+        attr_sorted = [v['s_abs_mean'] for v in s_sorted]
 
-    elif attr == 'var_xiaoxiao': # From the paper
+    elif attr == 'variance_characteristic_value': # From the paper
 
         #s_avg = complex_average(samples)
         for s in samples:
             num_rx, num_tx = s.shape
             s_avg = np.sum(s)/num_tx
             s_demeaned = s - s_avg
-            s_stddev = np.sqrt(np.sum(s_demeaned.conj() * s_demeaned)/num_tx)
-            #cs = s.conj().T * s
-            #print ('cs:\n', cs)
-            #print ('cs.shape:\n', cs.shape)
-            #print ('cs.diagonal:\n', np.diagonal(cs))
-            #print ('np.sqrt(np.sum(cs.diagonal)/n):\n', np.sqrt(np.sum(np.diagonal(cs))/num_tx))
-            #print ('s_stddev: \n', s_stddev)
+            s_var = np.sqrt(np.sum(s_demeaned.conj() * s_demeaned)/num_tx)
             s_info = {}
-            s_info = {'s_var': np.abs(s_stddev), 's': s}
+            s_info = {'s_var': np.abs(s_var), 's': s}
             s_not_sorted.append(s_info)
 
-        s_sorted = sorted(s_not_sorted, key=lambda k: k['s_var'])
-        s_sorted = np.array(s_sorted)
+        s_sorted = np.array(sorted(s_not_sorted, key=lambda k: k['s_var']))
         samples_sorted = [v['s'] for v in s_sorted]
         attr_sorted = [v['s_var'] for v in s_sorted]
 
@@ -202,6 +193,74 @@ def gain_distortion(sample, codebook_dict):
             max_gain = gain
             max_cw_id = cw_id
     return max_cw_id, max_gain
+
+def user_initial_codebook_option(samples, method):
+    pass
+
+def xiaoxiao(samples):
+    num_samples, num_rows, num_cols = samples.shape
+    samples_hadamard = hadamard_transform(samples, False)    
+
+    samples_sorted, attr_sorted = sorted_samples(samples_hadamard, 'variance_characteristic_value') 
+    
+    a_group_begin = 0
+    a_group_end = 17 * int(num_samples/20)
+
+    b_group_begin = a_group_end
+    b_group_end = b_group_begin + (2 * int(num_samples/20))
+
+    c_group_begin = b_group_end
+    c_group_end = -1 
+
+    a_group_of_samples = samples_sorted[a_group_begin:a_group_end, :, :]
+    b_group_of_samples = samples_sorted[b_group_begin:b_group_end, :, :]
+    c_group_of_samples = samples_sorted[c_group_begin:c_group_end, :, :]
+    
+    num_of_codewords = num_cols
+    samples_a_group_sorted, attr_a_group_sorted = sorted_samples(a_group_of_samples, 'abs_mean_characteristic_value') 
+    print (len(a_group_of_samples))
+
+    slot = int(len(a_group_of_samples)/(num_of_levels/2))
+    step = slot/2
+    index_codebook_list = []
+
+    for n_level in range(num_of_codewords/2):
+            start = n_level * p
+            end = start + p
+            index_codebook_list.append(int((start+end)/2))
+
+        codebook = np.array([samples[i] for i in index_codebook_list])
+ rint (len(a_group_of_samples)/(num_of_codewords/2))
+
+def katsavounidis(samples):
+
+    num_samples, num_rows, num_cols = samples.shape
+    max_norm = -np.Inf
+    max_sample_id = ''
+    samples_dict = matrix2dict(samples)
+        
+    for s_id, s in samples_dict.items():
+        s_norm = norm(s)
+        if s_norm > max_norm:
+            max_norm = s_norm
+            max_sample_id = s_id
+    
+    initial_codebook = np.zeros((num_of_elements, num_rows, num_cols), dtype=complex)
+    initial_codebook[0,:,:] = samples_dict.pop(max_sample_id) 
+
+    for i in range(0, num_of_elements -1):
+        cw = initial_codebook[i+1]
+        max_distance = -np.Inf
+        max_distance_sample_id = '' 
+        for s_id, s in samples_dict.items():
+            s_distance = norm(s - cw)
+            if s_distance > max_distance:
+                max_distance = s_distance
+                max_distance_sample_id = s_id
+        initial_codebook[i+1] = samples_dict.pop(max_distance_sample_id)
+
+    return initial_codebook
+ 
 
 def perform_distortion(sample, codebook_dict, metric):
     cw_id = None
