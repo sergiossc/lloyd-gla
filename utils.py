@@ -197,12 +197,17 @@ def gain_distortion(sample, codebook_dict):
 def user_initial_codebook_option(samples, method):
     pass
 
-def xiaoxiao(samples):
+def xiaoxiao_initial_codebook(samples):
+
     num_samples, num_rows, num_cols = samples.shape
+
+    # Code samples in hadamard code
     samples_hadamard = hadamard_transform(samples, False)    
 
+    # Ordering samples by variance characteristic value (ascending way)
     samples_sorted, attr_sorted = sorted_samples(samples_hadamard, 'variance_characteristic_value') 
     
+    # Index A, B and C groups
     a_group_begin = 0
     a_group_end = 17 * int(num_samples/20)
 
@@ -212,31 +217,65 @@ def xiaoxiao(samples):
     c_group_begin = b_group_end
     c_group_end = -1 
 
+    # Getting samples from ordered samples spliting in groups as indexed as before
     a_group_of_samples = samples_sorted[a_group_begin:a_group_end, :, :]
     b_group_of_samples = samples_sorted[b_group_begin:b_group_end, :, :]
     c_group_of_samples = samples_sorted[c_group_begin:c_group_end, :, :]
     
-    num_of_codewords = num_cols
+    # Ordering subgroups by mean characteristic value
     samples_a_group_sorted, attr_a_group_sorted = sorted_samples(a_group_of_samples, 'abs_mean_characteristic_value') 
-    print (len(a_group_of_samples))
+    samples_b_group_sorted, attr_a_group_sorted = sorted_samples(b_group_of_samples, 'abs_mean_characteristic_value') 
+    samples_c_group_sorted, attr_a_group_sorted = sorted_samples(c_group_of_samples, 'abs_mean_characteristic_value') 
 
-    slot = int(len(a_group_of_samples)/(num_of_levels/2))
+    # For each subgroup, select the codewords. Ex.: all/2, all/4 and all/4 number of codewords
+    num_of_codewords = num_cols
+
+    #print ('len(group_a): ', len(samples_a_group_sorted))
+    index_a = get_index_codewords_from_sub_samples(len(samples_a_group_sorted), num_of_codewords/2)
+    #print ('index_a:', index_a)
+
+    #print ('len(group_b): ', len(samples_b_group_sorted))
+    index_b = get_index_codewords_from_sub_samples(len(samples_b_group_sorted), num_of_codewords/4)
+    #print ('index_b:', index_b)
+
+    #print ('len(group_c): ', len(samples_c_group_sorted))
+    index_c = get_index_codewords_from_sub_samples(len(samples_c_group_sorted), num_of_codewords/4)
+    #print ('index_c:', index_c)
+
+
+    #igetting codewords from subgroups
+    list_initial_codebook_from_a_group = [samples_a_group_sorted[i] for i in index_a]
+    list_initial_codebook_from_b_group = [samples_b_group_sorted[i] for i in index_b]
+    list_initial_codebook_from_c_group = [samples_c_group_sorted[i] for i in index_c]
+
+    initial_codebook = np.array(list_initial_codebook_from_a_group + list_initial_codebook_from_b_group + list_initial_codebook_from_c_group)
+
+    #print (initial_codebook.shape)
+    return initial_codebook, samples_hadamard
+
+def get_index_codewords_from_sub_samples(n_samples, n_codewords):
+
+    slot = int(n_samples/n_codewords)
     step = slot/2
+
     index_codebook_list = []
 
-    for n_level in range(num_of_codewords/2):
-            start = n_level * p
-            end = start + p
-            index_codebook_list.append(int((start+end)/2))
+    for n in range(int(n_codewords)):
+            start = n * slot
+            mid = start + step
+            index_codebook_list.append(int(mid))
 
-        codebook = np.array([samples[i] for i in index_codebook_list])
- rint (len(a_group_of_samples)/(num_of_codewords/2))
+    return index_codebook_list
 
-def katsavounidis(samples):
+
+
+def katsavounidis_initial_codebook(samples):
 
     num_samples, num_rows, num_cols = samples.shape
+
     max_norm = -np.Inf
     max_sample_id = ''
+
     samples_dict = matrix2dict(samples)
         
     for s_id, s in samples_dict.items():
@@ -245,9 +284,13 @@ def katsavounidis(samples):
             max_norm = s_norm
             max_sample_id = s_id
     
-    initial_codebook = np.zeros((num_of_elements, num_rows, num_cols), dtype=complex)
+    num_of_codewords = num_cols
+    initial_codebook = np.zeros((num_of_codewords, num_rows, num_cols), dtype=complex)
+    
+    # Remove the max_sample_id from samples_dict and add it as our first codeword in initial_codebook
     initial_codebook[0,:,:] = samples_dict.pop(max_sample_id) 
 
+    # Now should be defined onother ones codewords by distance from each other
     for i in range(0, num_of_elements -1):
         cw = initial_codebook[i+1]
         max_distance = -np.Inf
@@ -268,7 +311,7 @@ def perform_distortion(sample, codebook_dict, metric):
     distortion_opts = {'mse': mse_distortion, 'gain': gain_distortion}
     distortion_function = distortion_opts.get(metric, None)
     cw_id, distortion = distortion_function(sample, codebook_dict)
-    return cw_id, distortion
+    return cw_id, np.abs(distortion)
 
 def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, distortion_measure, perturbation_variance=None, initial_codebook=None, percentage_of_sub_samples=None):
     """
@@ -308,6 +351,12 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
             codebook = initial_codebook
         num_of_rounds = 1 # for randomized initial alphabet method only one round is needed
        
+    elif initial_alphabet_opt == 'user_defined':
+        codebook = initial_codebook
+        num_of_rounds = 1 # for initial alphabet from user method only one round is needed
+ 
+
+
     elif initial_alphabet_opt == 'from_sorted_samples':
         #samples_sorted, attr_sorted = sorted_samples(samples, 'stddev')
         samples_sorted, attr_sorted = sorted_samples(samples, 'mse')
@@ -346,6 +395,8 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
         elif initial_alphabet_opt == 'random_from_samples':
             pass
         elif initial_alphabet_opt == 'sa':
+            pass
+        elif initial_alphabet_opt == 'user_defined':
             pass
         elif initial_alphabet_opt == 'from_sorted_samples':
             pass
@@ -399,7 +450,7 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
       
                     new_cw = new_cw/norm(new_cw)
                 else:
-                    if initial_alphabet_opt == 'random_from_samples' or initial_alphabet_opt == 'sa':
+                    if initial_alphabet_opt == 'random_from_samples' or initial_alphabet_opt == 'sa' or initial_alphabet_opt == 'user_defined':
                         #new_cw = codebook_dict[cw_id] # Enable this line to keep the cw who has 0 samples, but for a better design it should be removed from codebook.
                         new_cw_index = np.random.choice(len(samples))
                         new_cw = np.array(samples[new_cw_index]) # this is more interesting: if cw had groupped any sample, get another one from samples.

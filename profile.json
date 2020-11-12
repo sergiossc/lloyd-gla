@@ -1,13 +1,13 @@
 {
     "number_of_elements": [4],
-    "variance_of_samples_values": [1.0],
-    "initial_alphabet_opts": ["sa"],
+    "variance_of_samples_values": [0.1, 1.0],
+    "initial_alphabet_opts": ["user_defined"],
     "distortion_measure_opts": ["mse"],
-    "num_of_trials": 1,
-    "num_of_samples": 8004,
-    "num_of_interactions": 100,
+    "num_of_trials": 2,
+    "num_of_samples": 40,
+    "num_of_interactions": 2,
     "results_directory": "/home/snow/code/lloyd-gla/results",
     "percentage_of_sub_samples": 1,
     "use_same_samples_for_all": false,
-    "use_hadamard_opts": [false]
+    "initial_alphabet_method": ["katsavounidis", "xiaoxiao"]
 }
