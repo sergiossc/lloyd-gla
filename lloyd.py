@@ -9,7 +9,6 @@ import uuid
 import json
 import os
 from utils import *
-from scipy.linalg import hadamard
 
 def run_lloyd_gla(parm):
     instance_id = parm['instance_id']
@@ -28,6 +27,7 @@ def run_lloyd_gla(parm):
     num_of_samples = parm['num_of_samples']
     num_of_interactions = parm['num_of_interactions']
     percentage_of_sub_samples = parm['percentage_of_sub_samples']
+    use_hadamard = parm['use_hadamard']
 
     # Saving some information on data dict to (in the end) put it in json file
     data['num_of_elements'] = num_of_elements
@@ -38,6 +38,7 @@ def run_lloyd_gla(parm):
     data['num_of_samples'] = num_of_samples
     data['num_of_interactions'] = num_of_interactions
     data['percentage_of_sub_samples'] = percentage_of_sub_samples
+    data['use_hadamard'] = use_hadamard
 
     dftcodebook = gen_dftcodebook(num_of_elements)
 
@@ -49,9 +50,14 @@ def run_lloyd_gla(parm):
     
     use_same_samples_for_all = d['use_same_samples_for_all']
     samples = gen_samples(dftcodebook, num_of_samples, variance_of_samples, use_same_samples_for_all)
-
-    
+   
     num_samples, num_rows, num_cols = samples.shape
+    
+    if use_hadamard: 
+        samples_hadamard = hadamard_transform(samples, False)
+        samples = samples_hadamard
+
+     
     max_norm = -np.Inf
     max_sample_id = ''
 
@@ -84,14 +90,6 @@ def run_lloyd_gla(parm):
 
     #plot_codebook(initial_codebook, 'initial_codebook_from_paper.png')
 
-
-
-
-
-
-
-
-
     #samples_avg = complex_average(samples)
 
     ##samples = [richscatteringchnmtx(num_of_elements, 1, variance_of_samples) for i in range(num_of_samples)]
@@ -110,8 +108,6 @@ def run_lloyd_gla(parm):
     ##plot_samples(attr_sorted_avg, plot_filename_avg, r'Samples in ascending order by $abs(m_x)$: $N_r = 1$, $N_t = 16$, $k = $' + str(num_of_samples), r'$abs(m_x)$')
     ##plot_samples(attr_sorted_var, plot_filename_var, r'Samples in ascending order by $var_x$: $N_r = 1$, $N_t = 16$, $k = $' + str(num_of_samples), r'$var_x$')
 
-
-
     # Here, the number of lloyd levels or reconstruction alphabet is equal to number of elements
     num_of_levels = num_of_elements
     data['num_of_levels'] = num_of_levels
@@ -124,8 +120,11 @@ def run_lloyd_gla(parm):
  
     # Setup is ready! Now I can run lloyd algotihm according to the initial alphabet option chosen
     lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_interactions, distortion_measure_opt, variance_of_samples, initial_codebook, percentage_of_sub_samples)
+
     #plot_performance(mean_distortion_by_round, 'MSE as distortion', 'distortion.png')
-#
+    if use_hadamard:
+        lloydcodebook = hadamard_transform(lloydcodebook, True)
+
     data['lloydcodebook'] = encode_codebook(matrix2dict(lloydcodebook))
     data['sets'] = encode_sets(sets)
     data['mean_distortion_by_round'] = encode_mean_distortion(mean_distortion_by_round)
@@ -154,15 +153,17 @@ if __name__ == '__main__':
     results_dir = d['results_directory']
     use_same_samples_for_all = d['use_same_samples_for_all']
     percentage_of_sub_samples = d['percentage_of_sub_samples']
+    use_hadamard_opts = d['use_hadamard_opts']
 
     parms = []
     for n_elements in num_of_elements:
         for variance in variance_of_samples_values:
             for initial_alphabet_opt in initial_alphabet_opts:
                 for distortion_measure_opt in distortion_measure_opts:
-                    for n in range(num_of_trials):
-                        p = {'num_of_elements': n_elements, 'variance_of_samples': variance, 'initial_alphabet_opt':initial_alphabet_opt, 'distortion_measure_opt':distortion_measure_opt, 'num_of_samples':num_of_samples, 'num_of_interactions':num_of_interactions, 'results_dir': results_dir, 'use_same_samples_for_all': use_same_samples_for_all, 'instance_id': str(uuid.uuid4()), 'percentage_of_sub_samples': percentage_of_sub_samples}
-                        parms.append(p)
+                    for use_hadamard in use_hadamard_opts:
+                        for n in range(num_of_trials):
+                            p = {'num_of_elements': n_elements, 'variance_of_samples': variance, 'initial_alphabet_opt':initial_alphabet_opt, 'distortion_measure_opt':distortion_measure_opt, 'num_of_samples':num_of_samples, 'num_of_interactions':num_of_interactions, 'results_dir': results_dir, 'use_same_samples_for_all': use_same_samples_for_all, 'instance_id': str(uuid.uuid4()), 'percentage_of_sub_samples': percentage_of_sub_samples, 'use_hadamard': use_hadamard}
+                            parms.append(p)
     
     print ('# of cpus: ', os.cpu_count())
     print ('# of parms: ', len(parms))

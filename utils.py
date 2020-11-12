@@ -7,6 +7,7 @@ import numpy as np
 import uuid
 import matplotlib.pyplot as plt
 import json
+from scipy.linalg import hadamard
 
 def squared_norm(cw):
     """
@@ -505,3 +506,26 @@ def plot_performance(distortion_by_round, graph_title, filename):
     plt.title(graph_title)
     plt.legend()
     fig.savefig(filename)
+
+def hadamard_transform(samples, inverse=False):
+    num_samples, num_rows, num_cols = samples.shape
+    hadamard_mat = hadamard(int(num_cols), dtype=complex)
+    samples_converted = []
+
+    for s in samples:
+        s = s.reshape(num_cols)
+        s_h = np.zeros((num_cols), dtype=complex)
+        for n in range(num_cols):
+            s_h[n] = np.sum(hadamard_mat[n].conj() * s)
+        if inverse:
+            s_h = np.array(s_h).reshape(1, num_cols) * (1/num_cols)
+        else:
+            s_h = np.array(s_h).reshape(1, num_cols) 
+        
+        samples_converted.append(s_h)
+    samples_converted = np.array(samples_converted)
+
+    return samples_converted
+  
+
+
