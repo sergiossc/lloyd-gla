@@ -3,7 +3,7 @@
     "variance_of_samples_values": [1.0],
     "initial_alphabet_opts": ["user_defined"],
     "distortion_measure_opts": ["mse"],
-    "num_of_trials": 100,
+    "num_of_trials": 2,
     "num_of_samples": 8000,
     "num_of_interactions": 100,
     "results_directory": "/home/snow/code/lloyd-gla/results",
