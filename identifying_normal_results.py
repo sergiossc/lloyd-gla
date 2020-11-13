@@ -74,7 +74,8 @@ if __name__ == '__main__':
    
         norm =  np.sqrt(np.sum(np.power(np.abs(set_vector - normal_vector), 2)))
         #if norm == 0 and num_of_elements == 9 and variance_of_samples == 1.0 and initial_alphabet_method == 'katsavounidis': 
-        if norm == 0 and num_of_elements == 9 and variance_of_samples == 1.0 and initial_alphabet_method == 'xiaoxiao': 
+        #if  norm == 0 and num_of_elements == 4 and variance_of_samples == 0.1 and initial_alphabet_method == 'katsavounidis'
+        if  norm == 0 and num_of_elements == 9 and initial_alphabet_method == 'katsavounidis':
             occurences.append(1)
             print (pathfile)
 

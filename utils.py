@@ -194,8 +194,6 @@ def gain_distortion(sample, codebook_dict):
             max_cw_id = cw_id
     return max_cw_id, max_gain
 
-def user_initial_codebook_option(samples, method):
-    pass
 
 def xiaoxiao_initial_codebook(samples):
 

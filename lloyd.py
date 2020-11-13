@@ -51,16 +51,16 @@ def run_lloyd_gla(parm):
     samples = gen_samples(dftcodebook, num_of_samples, variance_of_samples, use_same_samples_for_all)
    
     num_samples, num_rows, num_cols = samples.shape
-    initial_codebook = katsavounidis_initial_codebook(samples)
+    #initial_codebook = katsavounidis_initial_codebook(samples)
     #plot_codebook(initial_codebook, 'initial_codebook_from_katsavounidis_initial_codebook.png')
-    ##initial_codebook = np.zeros((num_of_elements, num_rows, num_cols), dtype=complex)
+    initial_codebook = np.zeros((num_of_elements, num_rows, num_cols), dtype=complex)
      
-    ##if initial_alphabet_opt == 'user_defined':
-    ##    if initial_alphabet_opt == 'xiaoxiao':
-    ##        initial_codebook, samples_hadamard = xiaoxiao_initial_codebook(samples)
-    ##        samples = samples_hadamard
-    ##    elif initial_alphabet_opt == 'katsavounidis':
-    ##        initial_codebook = katsavounidis_initial_codebook(samples)
+    if initial_alphabet_opt == 'user_defined':
+        if initial_alphabet_opt == 'xiaoxiao':
+            initial_codebook, samples_hadamard = xiaoxiao_initial_codebook(samples)
+            samples = samples_hadamard
+        elif initial_alphabet_opt == 'katsavounidis':
+            initial_codebook = katsavounidis_initial_codebook(samples)
     
     #    #print ('max_distance: ', max_distance)
     #print ('initial_codebook: \n', initial_codebook)
@@ -99,12 +99,13 @@ def run_lloyd_gla(parm):
     lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_interactions, distortion_measure_opt, variance_of_samples, initial_codebook, percentage_of_sub_samples)
 
     ##plot_performance(mean_distortion_by_round, 'MSE as distortion', 'distortion.png')
-    ##if initial_alphabet_opt == 'user_defined':
-    ##    if initial_alphabet_opt == 'xiaoxiao':
-    ##        # We have to get inverse transform from hadamard code
-    ##        lloydcodebook = hadamard_transform(lloydcodebook, True)
-    ##    elif initial_alphabet_opt == 'katsavounidis':
-    ##        pass
+    if initial_alphabet_opt == 'user_defined':
+        if initial_alphabet_opt == 'xiaoxiao':
+            # We have to get inverse transform from hadamard code
+            lloydcodebook = hadamard_transform(lloydcodebook, True)
+        elif initial_alphabet_opt == 'katsavounidis':
+            # There is nothing to do
+            pass
  
     data['lloydcodebook'] = encode_codebook(matrix2dict(lloydcodebook))
     data['sets'] = encode_sets(sets)
