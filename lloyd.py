@@ -51,65 +51,67 @@ def run_lloyd_gla(parm):
     samples = gen_samples(dftcodebook, num_of_samples, variance_of_samples, use_same_samples_for_all)
    
     num_samples, num_rows, num_cols = samples.shape
-    initial_codebook = np.zeros((num_of_elements, num_rows, num_cols), dtype=complex)
-     
-    if initial_alphabet_opt == 'user_defined':
-        if initial_alphabet_opt == 'xiaoxiao':
-            initial_codebook, samples_hadamard = xiaoxiao_initial_codebook(samples)
-            samples = samples_hadamard
-        elif initial_alphabet_opt == 'katsavounidis':
-            initial_codebook = katsavounidis_initial_codebook(samples)
-    
-    #    #print ('max_distance: ', max_distance)
-    #print ('initial_codebook: \n', initial_codebook)
-    #    max_sample = max_distance_sample
-
-    #plot_codebook(initial_codebook, 'initial_codebook_from_xiaoxiao_paper.png')
-
-    #samples_avg = complex_average(samples)
-
-    ##samples = [richscatteringchnmtx(num_of_elements, 1, variance_of_samples) for i in range(num_of_samples)]
-    ##samples = np.array(samples)
-    
-    #samples_normalized = np.array([sample/norm(sample) for sample  in samples])
-    #samples_sorted, attr_sorted = sorted_samples(samples, 'stddev')
-
-    ##samples_sorted_avg, attr_sorted_avg = sorted_samples(samples, 'avg_xiaoxiao')
-    ##samples_sorted_var, attr_sorted_var = sorted_samples(samples, 'var_xiaoxiao')
-    
-    ##plot_filename_avg = 'plot_samples_avg_nt16_ordered_' + str(instance_id) + '.png'
-    ##plot_filename_var = 'plot_samples_var_nt16_ordered_' + str(instance_id) + '.png'
-
-    #plot_samples(attr_sorted_avg, plot_filename_avg, r'$abs(m_x)$', 'abs(m_x)')
-    ##plot_samples(attr_sorted_avg, plot_filename_avg, r'Samples in ascending order by $abs(m_x)$: $N_r = 1$, $N_t = 16$, $k = $' + str(num_of_samples), r'$abs(m_x)$')
-    ##plot_samples(attr_sorted_var, plot_filename_var, r'Samples in ascending order by $var_x$: $N_r = 1$, $N_t = 16$, $k = $' + str(num_of_samples), r'$var_x$')
-
-    # Here, the number of lloyd levels or reconstruction alphabet is equal to number of elements
-    num_of_levels = num_of_elements
-    data['num_of_levels'] = num_of_levels
-
-    # Choose a seed to keep a track of this trial. This seed is saved on json data file.
-    trial_seed = np.random.randint(5, 500000)
-    np.random.seed(trial_seed)
-    data['random_seed'] = trial_seed
- 
-    # Setup is ready! Now I can run lloyd algotihm according to the initial alphabet option chosen
-    lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_interactions, distortion_measure_opt, variance_of_samples, initial_codebook, percentage_of_sub_samples)
-
-    ##plot_performance(mean_distortion_by_round, 'MSE as distortion', 'distortion.png')
-    if initial_alphabet_opt == 'user_defined':
-        if initial_alphabet_opt == 'xiaoxiao':
-            # We have to get inverse transform from hadamard code
-            lloydcodebook = hadamard_transform(lloydcodebook, True)
-        elif initial_alphabet_opt == 'katsavounidis':
-            pass
- 
-    data['lloydcodebook'] = encode_codebook(matrix2dict(lloydcodebook))
-    data['sets'] = encode_sets(sets)
-    data['mean_distortion_by_round'] = encode_mean_distortion(mean_distortion_by_round)
-
-    with open(json_filename, "w") as write_file:
-        json.dump(data, write_file, indent=4)
+    initial_codebook = katsavounidis_initial_codebook(samples)
+    plot_codebook(initial_codebook, 'initial_codebook_from_katsavounidis_initial_codebook.png')
+#    initial_codebook = np.zeros((num_of_elements, num_rows, num_cols), dtype=complex)
+#     
+#    if initial_alphabet_opt == 'user_defined':
+#        if initial_alphabet_opt == 'xiaoxiao':
+#            initial_codebook, samples_hadamard = xiaoxiao_initial_codebook(samples)
+#            samples = samples_hadamard
+#        elif initial_alphabet_opt == 'katsavounidis':
+#            initial_codebook = katsavounidis_initial_codebook(samples)
+#    
+#    #    #print ('max_distance: ', max_distance)
+#    #print ('initial_codebook: \n', initial_codebook)
+#    #    max_sample = max_distance_sample
+#
+#    #plot_codebook(initial_codebook, 'initial_codebook_from_xiaoxiao_paper.png')
+#
+#    #samples_avg = complex_average(samples)
+#
+#    ##samples = [richscatteringchnmtx(num_of_elements, 1, variance_of_samples) for i in range(num_of_samples)]
+#    ##samples = np.array(samples)
+#    
+#    #samples_normalized = np.array([sample/norm(sample) for sample  in samples])
+#    #samples_sorted, attr_sorted = sorted_samples(samples, 'stddev')
+#
+#    ##samples_sorted_avg, attr_sorted_avg = sorted_samples(samples, 'avg_xiaoxiao')
+#    ##samples_sorted_var, attr_sorted_var = sorted_samples(samples, 'var_xiaoxiao')
+#    
+#    ##plot_filename_avg = 'plot_samples_avg_nt16_ordered_' + str(instance_id) + '.png'
+#    ##plot_filename_var = 'plot_samples_var_nt16_ordered_' + str(instance_id) + '.png'
+#
+#    #plot_samples(attr_sorted_avg, plot_filename_avg, r'$abs(m_x)$', 'abs(m_x)')
+#    ##plot_samples(attr_sorted_avg, plot_filename_avg, r'Samples in ascending order by $abs(m_x)$: $N_r = 1$, $N_t = 16$, $k = $' + str(num_of_samples), r'$abs(m_x)$')
+#    ##plot_samples(attr_sorted_var, plot_filename_var, r'Samples in ascending order by $var_x$: $N_r = 1$, $N_t = 16$, $k = $' + str(num_of_samples), r'$var_x$')
+#
+#    # Here, the number of lloyd levels or reconstruction alphabet is equal to number of elements
+#    num_of_levels = num_of_elements
+#    data['num_of_levels'] = num_of_levels
+#
+#    # Choose a seed to keep a track of this trial. This seed is saved on json data file.
+#    trial_seed = np.random.randint(5, 500000)
+#    np.random.seed(trial_seed)
+#    data['random_seed'] = trial_seed
+# 
+#    # Setup is ready! Now I can run lloyd algotihm according to the initial alphabet option chosen
+#    lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_interactions, distortion_measure_opt, variance_of_samples, initial_codebook, percentage_of_sub_samples)
+#
+#    ##plot_performance(mean_distortion_by_round, 'MSE as distortion', 'distortion.png')
+#    if initial_alphabet_opt == 'user_defined':
+#        if initial_alphabet_opt == 'xiaoxiao':
+#            # We have to get inverse transform from hadamard code
+#            lloydcodebook = hadamard_transform(lloydcodebook, True)
+#        elif initial_alphabet_opt == 'katsavounidis':
+#            pass
+# 
+#    data['lloydcodebook'] = encode_codebook(matrix2dict(lloydcodebook))
+#    data['sets'] = encode_sets(sets)
+#    data['mean_distortion_by_round'] = encode_mean_distortion(mean_distortion_by_round)
+#
+#    with open(json_filename, "w") as write_file:
+#        json.dump(data, write_file, indent=4)
 
     return 0
 

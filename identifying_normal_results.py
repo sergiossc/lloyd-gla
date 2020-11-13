@@ -61,6 +61,10 @@ if __name__ == '__main__':
         variance_of_samples = d['variance_of_samples']
         distortion_measure_opt = d['distortion_measure_opt']
         use_same_samples_for_all = d['use_same_samples_for_all'] 
+        initial_alphabet_opt = d['initial_alphabet_opt']
+        initial_alphabet_method = d['initial_alphabet_method']
+        num_of_elements = d['num_of_elements']
+
         normal_vector = np.ones(num_of_levels) * (num_of_samples/num_of_levels)
         sets = d['sets']
         set_vector = []
@@ -69,7 +73,8 @@ if __name__ == '__main__':
         set_vector = np.array(set_vector)
    
         norm =  np.sqrt(np.sum(np.power(np.abs(set_vector - normal_vector), 2)))
-        if norm == 0: 
+        #if norm == 0 and num_of_elements == 9 and variance_of_samples == 1.0 and initial_alphabet_method == 'katsavounidis': 
+        if norm == 0 and num_of_elements == 9 and variance_of_samples == 1.0 and initial_alphabet_method == 'xiaoxiao': 
             occurences.append(1)
             print (pathfile)
 

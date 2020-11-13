@@ -273,11 +273,12 @@ def katsavounidis_initial_codebook(samples):
 
     num_samples, num_rows, num_cols = samples.shape
 
-    max_norm = -np.Inf
-    max_sample_id = ''
 
     samples_dict = matrix2dict(samples)
         
+    max_norm = -np.Inf
+    max_sample_id = ''
+
     for s_id, s in samples_dict.items():
         s_norm = norm(s)
         if s_norm > max_norm:
@@ -290,17 +291,45 @@ def katsavounidis_initial_codebook(samples):
     # Remove the max_sample_id from samples_dict and add it as our first codeword in initial_codebook
     initial_codebook[0,:,:] = samples_dict.pop(max_sample_id) 
 
-    # Now should be defined onother ones codewords by distance from each other
-    for i in range(0, num_of_elements -1):
-        cw = initial_codebook[i+1]
+    # Step 2: Define 2nd codeword as the largest distance from the 1st codeword
+    cw = initial_codebook[0,:,:]
+    max_distance = -np.Inf
+    max_distance_sample_id = '' 
+    for s_id, s in samples_dict.items():
+        s_distance = norm(s - cw)
+        if s_distance > max_distance:
+            max_distance = s_distance
+            max_distance_sample_id = s_id
+    initial_codebook[1,:,:] = samples_dict.pop(max_distance_sample_id)
+
+    # Step 3: defining next codewords
+
+    for i in range(0, num_of_codewords - 2):
+
+        for s_id, s in samples_dict.items():
+    
+            min_distance = np.Inf
+            min_distance_sample_id = '' 
+    
+            for codeword in initial_codebook:
+                s_distance = norm(s - codeword)
+                if s_distance < min_distance:
+                    min_distance = s_distance
+                    min_distance_sample_id = s_id
+    
+    
         max_distance = -np.Inf
         max_distance_sample_id = '' 
+
         for s_id, s in samples_dict.items():
-            s_distance = norm(s - cw)
+    
+            s_distance = norm(s - samples_dict[min_distance_sample_id])
             if s_distance > max_distance:
                 max_distance = s_distance
                 max_distance_sample_id = s_id
-        initial_codebook[i+1] = samples_dict.pop(max_distance_sample_id)
+    
+    
+        initial_codebook[i+2,:,:] = samples_dict.pop(max_distance_sample_id)
 
     return initial_codebook
  
