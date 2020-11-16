@@ -56,17 +56,17 @@ def run_lloyd_gla(parm):
     initial_codebook = np.zeros((num_of_elements, num_rows, num_cols), dtype=complex)
      
     if initial_alphabet_opt == 'user_defined':
-        if initial_alphabet_opt == 'xiaoxiao':
+        if initial_alphabet_method == 'xiaoxiao':
             initial_codebook, samples_hadamard = xiaoxiao_initial_codebook(samples)
             samples = samples_hadamard
-        elif initial_alphabet_opt == 'katsavounidis':
+        elif initial_alphabet_method == 'katsavounidis':
             initial_codebook = katsavounidis_initial_codebook(samples)
     
     #    #print ('max_distance: ', max_distance)
     #print ('initial_codebook: \n', initial_codebook)
     #    max_sample = max_distance_sample
 
-    #plot_codebook(initial_codebook, 'initial_codebook_from_xiaoxiao_paper.png')
+    plot_codebook(initial_codebook, 'initial_codebook_from_' + str(initial_alphabet_method) + '_' + str(instance_id) + '_paper.png')
 
     #samples_avg = complex_average(samples)
 

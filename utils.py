@@ -304,17 +304,23 @@ def katsavounidis_initial_codebook(samples):
 
     for i in range(0, num_of_codewords - 2):
 
+        min_distance = np.Inf
+        min_distance_sample_id = '' 
+
         for s_id, s in samples_dict.items():
-    
-            min_distance = np.Inf
-            min_distance_sample_id = '' 
-    
+            s_distance = 0
             for codeword in initial_codebook:
-                s_distance = norm(s - codeword)
-                if s_distance < min_distance:
-                    min_distance = s_distance
-                    min_distance_sample_id = s_id
+                s_distance = s_distance + norm(s - codeword)
+            if s_distance < min_distance:
+                min_distance = s_distance
+                min_distance_sample_id = s_id
     
+        #for s_id, s in samples_dict.items():
+        #    for codeword in initial_codebook:
+        #        s_distance = norm(s - codeword)
+        #        if s_distance < min_distance:
+        #            min_distance = s_distance
+        #            min_distance_sample_id = s_id
     
         max_distance = -np.Inf
         max_distance_sample_id = '' 
