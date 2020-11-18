@@ -348,6 +348,51 @@ def perform_distortion(sample, codebook_dict, metric):
     cw_id, distortion = distortion_function(sample, codebook_dict)
     return cw_id, np.abs(distortion)
 
+def sa(initial_codebook, variance_of_samples, initial_temperature, max_iteractions, lloyd_num_of_interactions, distortion_measure_opt, num_of_levels, samples):
+    
+    best_lloydcodebook, best_sets, best_mean_distortion_by_round = lloyd_gla("sa", samples, num_of_levels, lloyd_num_of_interactions, distortion_measure_opt, None, initial_codebook, None)
+    best_mean_distortion_list = list(best_mean_distortion_by_round[1])
+    best_distortion = best_mean_distortion_list[-1]
+    current_temperature = initial_temperature
+    current_iteraction = 0
+    while current_temperature > 0.01:
+        print (current_temperature)
+        while current_iteraction < max_iteractions:
+            
+            candidate_codebook = gen_samples(initial_codebook, num_of_levels, variance, None)
+            candidate_lloydcodebook, candidate_sets, candidate_mean_distortion_by_round = lloyd_gla("sa", samples, num_of_levels, lloyd_num_of_interactions, distortion_measure_opt, None, candidate_codebook, None)
+            candidate_distortion_by_lloyd_interactions = list(candidate_mean_distortion_by_round[1])
+            candidate_distortion = candidate_distortion_by_lloyd_interactions[-1]
+
+
+            initial_lloydcodebook, initial_sets, initial_mean_distortion_by_round = lloyd_gla("sa", samples, num_of_levels, lloyd_num_of_interactions, distortion_measure_opt, None, initial_codebook, None)
+            initial_distortion_by_lloyd_interactions = list(initial_mean_distortion_by_round[1])
+            initial_distortion = initial_distortion_by_lloyd_interactions[-1]
+
+            delta_distortion = candidate_distortion - initial_distortion
+            if delta_distortion < 0:
+                initial_codebook = candidate_codebook
+                if (candidate_distortion < best_distortion):
+                    best_distortion = candidate_distortion
+                    best_lloydcodebook = candidate_lloydcodebook
+                    best_sets = candidate_sets
+                    best_mean_distortion_by_round = candidate_mean_distortion_by_round
+                    #print ('candidate: ', candidate_distortion)
+                    #print ('initial: ', initial_distortion)
+            else:
+                x = np.random.rand()
+                if (x < np.exp(-delta_distortion/current_temperature)):
+                    initial_codebook = candidate_codebook
+
+            current_iteraction += 1
+        current_temperature = current_temperature * 0.1
+        current_iteraction = 0
+    print (best_distortion)
+    return best_lloydcodebook, best_sets, best_mean_distortion_by_round
+
+
+
+
 def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, distortion_measure, perturbation_variance=None, initial_codebook=None, percentage_of_sub_samples=None):
     """
         This method implements Lloyd algorithm. There are two options of initial reconstruct alphabet: (1) begining a unitary codebook and duplicate it in each round. The number of rounds is log2(num_of_levels). And (2) randomized initial reconstruct alphabet from samples.
@@ -389,27 +434,24 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
     elif initial_alphabet_opt == 'user_defined':
         codebook = initial_codebook
         num_of_rounds = 1 # for initial alphabet from user method only one round is needed
- 
 
+    #elif initial_alphabet_opt == 'from_sorted_samples':
+    #    #samples_sorted, attr_sorted = sorted_samples(samples, 'stddev')
+    #    samples_sorted, attr_sorted = sorted_samples(samples, 'mse')
+    #    samples = samples_sorted
+    #    num_of_rounds = 1
 
-    elif initial_alphabet_opt == 'from_sorted_samples':
-        #samples_sorted, attr_sorted = sorted_samples(samples, 'stddev')
-        samples_sorted, attr_sorted = sorted_samples(samples, 'mse')
-        samples = samples_sorted
-        num_of_rounds = 1
+    #    nsamples, nrows, ncols = samples.shape
+    #    p = int(nsamples/num_of_levels)
 
-        nsamples, nrows, ncols = samples.shape
-        p = int(nsamples/num_of_levels)
+    #    index_codebook_list = []
 
-        index_codebook_list = []
+    #    for n_level in range(num_of_levels):
+    #        start = n_level * p
+    #        end = start + p
+    #        index_codebook_list.append(int((start+end)/2))
 
-        for n_level in range(num_of_levels):
-            start = n_level * p
-            end = start + p
-            index_codebook_list.append(int((start+end)/2))
-
-        codebook = np.array([samples[i] for i in index_codebook_list])
- 
+    #    codebook = np.array([samples[i] for i in index_codebook_list])
  
     else:
         return None
@@ -433,8 +475,8 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
             pass
         elif initial_alphabet_opt == 'user_defined':
             pass
-        elif initial_alphabet_opt == 'from_sorted_samples':
-            pass
+        #elif initial_alphabet_opt == 'from_sorted_samples':
+        #    pass
         else:
             return None
 

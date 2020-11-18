@@ -80,13 +80,15 @@ if __name__ == '__main__':
         #if  norm == 0 and num_of_elements == 4 and variance_of_samples == 0.1 and initial_alphabet_method == 'katsavounidis'
         if  variance_of_samples == 0.1 and num_of_elements == 4 and initial_alphabet_method == 'katsavounidis':
             occurences_l1.append(1)
-            print (pathfile)
+            if norm < 1000 and norm > 0:
+                print (pathfile)
             trial_info = {'norm': norm}
             norm_values_l1.append(trial_info)
 
         elif  variance_of_samples == 1.0 and num_of_elements == 4 and initial_alphabet_method == 'katsavounidis':
             occurences_l2.append(1)
-            print (pathfile)
+            if norm < 1000 and norm > 0:
+                print (pathfile)
             trial_info = {'norm': norm}
             norm_values_l2.append(trial_info)
 
@@ -95,13 +97,13 @@ if __name__ == '__main__':
     print(len(occurences_l1))
     print(len(occurences_l2))
 
-    norm_values_array_l1 = np.array(sorted(norm_values_l1, key=lambda k: k['norm'], reverse=True))
-    norm_values_array_l1 = np.array([v['norm'] for v in norm_values_array_l1])
+    ##norm_values_array_l1 = np.array(sorted(norm_values_l1, key=lambda k: k['norm'], reverse=True))
+    norm_values_array_l1 = np.array([v['norm'] for v in norm_values_l1])
     #norm_values_array_l1 = norm_values_array_l1/np.sqrt((np.sum(np.power(norm_values_array_l1, 2))))
     plt.plot(norm_values_array_l1, 'r*', label='variance = 0.1')
 
-    norm_values_array_l2 = np.array(sorted(norm_values_l2, key=lambda k: k['norm'], reverse=True))
-    norm_values_array_l2 = np.array([v['norm'] for v in norm_values_array_l2])
+    ##norm_values_array_l2 = np.array(sorted(norm_values_l2, key=lambda k: k['norm'], reverse=True))
+    norm_values_array_l2 = np.array([v['norm'] for v in norm_values_l2])
     #norm_values_array_l2 = norm_values_array_l2/np.sqrt((np.sum(np.power(norm_values_array_l2, 2))))
     plt.plot(norm_values_array_l2, 'g*', label='variance = 1.0')
 

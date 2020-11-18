@@ -72,6 +72,30 @@ def run_lloyd_gla(parm):
             initial_codebook = katsavounidis_initial_codebook(samples)
     
         data['initial_codebook'] = encode_codebook(matrix2dict(initial_codebook))
+
+        # Setup is ready! Now I can run lloyd algotihm according to the initial alphabet option chosen
+        lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, max_num_of_interactions, distortion_measure_opt, variance_of_samples, initial_codebook, percentage_of_sub_samples)
+
+        if initial_alphabet_opt == 'xiaoxiao':
+            # We have to get inverse transform from hadamard code
+            lloydcodebook = hadamard_transform(lloydcodebook, True)
+        elif initial_alphabet_opt == 'katsavounidis':
+            # There is nothing to do
+            pass
+
+    elif initial_alphabet_opt == 'sa':
+        initial_codebook = np.array([samples_normalized[i] for i in np.random.choice(len(samples), num_of_levels, replace=False)])
+        initial_temperature = 10
+        sa_max_num_of_iteractions = 20
+        lloydcodebook, sets, mean_distortion_by_round = sa(initial_codebook, variance_of_samples, initial_temperature, sa_max_num_of_iteractions, max_num_of_interactions, distortion_measure_opt, num_of_levels, samples)
+
+    elif initial_alphabet_opt == 'unitary_until_num_of_elements':
+        pass
+
+    elif initial_alphabet_opt == 'random_from_samples':
+        pass
+ 
+
     #    #print ('max_distance: ', max_distance)
     #print ('initial_codebook: \n', initial_codebook)
     #    max_sample = max_distance_sample
@@ -98,18 +122,9 @@ def run_lloyd_gla(parm):
 
 
 
-    # Setup is ready! Now I can run lloyd algotihm according to the initial alphabet option chosen
-    lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, max_num_of_interactions, distortion_measure_opt, variance_of_samples, initial_codebook, percentage_of_sub_samples)
 
     ##plot_performance(mean_distortion_by_round, 'MSE as distortion', 'distortion.png')
-    if initial_alphabet_opt == 'user_defined':
-        if initial_alphabet_opt == 'xiaoxiao':
-            # We have to get inverse transform from hadamard code
-            lloydcodebook = hadamard_transform(lloydcodebook, True)
-        elif initial_alphabet_opt == 'katsavounidis':
-            # There is nothing to do
-            pass
- 
+    # Saving results in JSON file 
     data['lloydcodebook'] = encode_codebook(matrix2dict(lloydcodebook))
     data['sets'] = encode_sets(sets)
     data['mean_distortion_by_round'] = encode_mean_distortion(mean_distortion_by_round)
@@ -161,6 +176,7 @@ if __name__ == '__main__':
             #print (initial_codebook.shape)
                                 
             p = {'num_of_elements': n_elements, 'variance_of_samples': variance, 'initial_alphabet_opt':initial_alphabet_opt, 'distortion_measure_opt':distortion_measure_opt, 'num_of_samples':num_of_samples, 'max_num_of_interactions':max_num_of_interactions, 'results_dir': results_dir, 'use_same_samples_for_all': use_same_samples_for_all, 'instance_id': instance_id, 'percentage_of_sub_samples': percentage_of_sub_samples, 'initial_alphabet_method': initial_alphabet_method, 'samples_random_seed': int(samples_random_seed)}
+
             run_lloyd_gla(p)
 
             print (p)
