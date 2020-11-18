@@ -129,7 +129,7 @@ if __name__ == '__main__':
         if not os.path.isfile(trial_pathfile):
             print('Wrong trial pathfile')
         else:
-            print('_________________________________')
+            print('trial begin_________________________________')
 
             with open(trial_pathfile) as trial_results:
                 data = trial_results.read()
@@ -163,8 +163,8 @@ if __name__ == '__main__':
             p = {'num_of_elements': n_elements, 'variance_of_samples': variance, 'initial_alphabet_opt':initial_alphabet_opt, 'distortion_measure_opt':distortion_measure_opt, 'num_of_samples':num_of_samples, 'max_num_of_interactions':max_num_of_interactions, 'results_dir': results_dir, 'use_same_samples_for_all': use_same_samples_for_all, 'instance_id': instance_id, 'percentage_of_sub_samples': percentage_of_sub_samples, 'initial_alphabet_method': initial_alphabet_method, 'samples_random_seed': int(samples_random_seed)}
             run_lloyd_gla(p)
 
-            print('_________________________________')
             print (p)
+            print('trial end_________________________________')
 
 
     else:  
@@ -210,7 +210,6 @@ if __name__ == '__main__':
         
         print ('# of cpus: ', os.cpu_count())
         print ('# of parms: ', len(parms))
-        print ('parms: ', parms)
         
         with concurrent.futures.ProcessPoolExecutor() as e:
             for p, r in zip(parms, e.map(run_lloyd_gla, parms)):
