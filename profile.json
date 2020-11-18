@@ -4,7 +4,7 @@
     "initial_alphabet_opts": ["user_defined"],
     "distortion_measure_opts": ["mse"],
     "num_of_trials": 100,
-    "num_of_samples": 8,
+    "num_of_samples": 8000,
     "max_num_of_interactions": 1000,
     "results_directory": "/home/snow/code/lloyd-gla/results",
     "percentage_of_sub_samples": 1,

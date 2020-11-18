@@ -60,15 +60,13 @@ if __name__ == '__main__':
 
         # May you edit from right here! Tip: Read *json file in results to decide how to deal from here.
         initial_alphabet_opt = d['initial_alphabet_opt']
-        num_of_levels = d['num_of_levels']
-        num_of_samples = d['num_of_samples']
         variance_of_samples = d['variance_of_samples']
         distortion_measure_opt = d['distortion_measure_opt']
-        use_same_samples_for_all = d['use_same_samples_for_all'] 
         initial_alphabet_opt = d['initial_alphabet_opt']
         initial_alphabet_method = d['initial_alphabet_method']
         num_of_elements = d['num_of_elements']
-        random_seed = d['random_seed']
+        num_of_levels = num_of_elements 
+        num_of_samples = d['num_of_samples']
 
         normal_vector = np.ones(num_of_levels) * (num_of_samples/num_of_levels)
         sets = d['sets']
@@ -80,17 +78,17 @@ if __name__ == '__main__':
         norm =  np.sqrt(np.sum(np.power(np.abs(set_vector - normal_vector), 2)))
         #if norm == 0 and num_of_elements == 9 and variance_of_samples == 1.0 and initial_alphabet_method == 'katsavounidis': 
         #if  norm == 0 and num_of_elements == 4 and variance_of_samples == 0.1 and initial_alphabet_method == 'katsavounidis'
-        if  norm > 10000 and variance_of_samples == 0.1 and num_of_elements == 4 and initial_alphabet_method == 'katsavounidis':
+        if  variance_of_samples == 0.1 and num_of_elements == 4 and initial_alphabet_method == 'katsavounidis':
             occurences_l1.append(1)
             print (pathfile)
             trial_info = {'norm': norm}
             norm_values_l1.append(trial_info)
 
-        #elif  variance_of_samples == 1.0 and num_of_elements == 4 and initial_alphabet_method == 'katsavounidis':
-        #    occurences_l2.append(1)
-        #    print (pathfile)
-        #    trial_info = {'norm': norm}
-        #    norm_values_l2.append(trial_info)
+        elif  variance_of_samples == 1.0 and num_of_elements == 4 and initial_alphabet_method == 'katsavounidis':
+            occurences_l2.append(1)
+            print (pathfile)
+            trial_info = {'norm': norm}
+            norm_values_l2.append(trial_info)
 
 
 
@@ -102,10 +100,10 @@ if __name__ == '__main__':
     #norm_values_array_l1 = norm_values_array_l1/np.sqrt((np.sum(np.power(norm_values_array_l1, 2))))
     plt.plot(norm_values_array_l1, 'r*', label='variance = 0.1')
 
-    ##norm_values_array_l2 = np.array(sorted(norm_values_l2, key=lambda k: k['norm'], reverse=True))
-    ##norm_values_array_l2 = np.array([v['norm'] for v in norm_values_array_l2])
+    norm_values_array_l2 = np.array(sorted(norm_values_l2, key=lambda k: k['norm'], reverse=True))
+    norm_values_array_l2 = np.array([v['norm'] for v in norm_values_array_l2])
     #norm_values_array_l2 = norm_values_array_l2/np.sqrt((np.sum(np.power(norm_values_array_l2, 2))))
-    ##plt.plot(norm_values_array_l2, 'g*', label='variance = 1.0')
+    plt.plot(norm_values_array_l2, 'g*', label='variance = 1.0')
 
     plt.legend()
     
