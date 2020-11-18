@@ -2,6 +2,7 @@ import uuid
 import json
 import numpy as np
 import os
+import matplotlib.pyplot as plt
 
 def check_files(prefix, episodefiles):
     pathfiles = {}
@@ -48,7 +49,10 @@ if __name__ == '__main__':
     filter4 = {'initial_alphabet_opt': 'unitary_until_num_of_elements', 'distortion_measure_opt': 'gain', 'num_of_levels': 4, 'variance_of_samples': 0.25}
     #trial_result = (initial_alphabet_opt, distortion_measure_opt, num_of_levels, variance_of_samples, norm)
     filters.append(filter4)
-    occurences = [] # it is an histogram of filters
+    occurences_l1 = [] # it is an histogram of filters
+    occurences_l2 = [] # it is an histogram of filters
+    norm_values_l1 = []
+    norm_values_l2 = []
     for pathfile_id, pathfile in pathfiles.items():
         with open(pathfile) as result:
             data = result.read()
@@ -64,6 +68,7 @@ if __name__ == '__main__':
         initial_alphabet_opt = d['initial_alphabet_opt']
         initial_alphabet_method = d['initial_alphabet_method']
         num_of_elements = d['num_of_elements']
+        random_seed = d['random_seed']
 
         normal_vector = np.ones(num_of_levels) * (num_of_samples/num_of_levels)
         sets = d['sets']
@@ -75,20 +80,35 @@ if __name__ == '__main__':
         norm =  np.sqrt(np.sum(np.power(np.abs(set_vector - normal_vector), 2)))
         #if norm == 0 and num_of_elements == 9 and variance_of_samples == 1.0 and initial_alphabet_method == 'katsavounidis': 
         #if  norm == 0 and num_of_elements == 4 and variance_of_samples == 0.1 and initial_alphabet_method == 'katsavounidis'
-        if  norm == 0 and num_of_elements == 4 and initial_alphabet_method == 'katsavounidis':
-            occurences.append(1)
+        if  norm > 10000 and variance_of_samples == 0.1 and num_of_elements == 4 and initial_alphabet_method == 'katsavounidis':
+            occurences_l1.append(1)
             print (pathfile)
+            trial_info = {'norm': norm}
+            norm_values_l1.append(trial_info)
 
-        #trial_result = (initial_alphabet_opt, distortion_measure_opt, num_of_levels, variance_of_samples, norm)
-        #trial_result = [(initial_alphabet_opt, distortion_measure_opt, num_of_levels, variance_of_samples, norm)]
-        #trial_result = {'initial_alphabet_opt': initial_alphabet_opt, 'distortion_measure_opt': distortion_measure_opt, 'num_of_levels':num_of_levels, 'variance_of_samples':variance_of_samples}
-        #occurences = filter(filtering, trial_result)
-        #for f in filters:
-        #    f_values = list(f.values())
-        #    trial_values = list(trial_result.values())
-        #    if f_values == trial_values:
-        #        print (f)
-        #        print (trial_result)
-        #        occurences.append(trial_result)
-    #for occurence in occurences:
-    print(len(occurences))
+        #elif  variance_of_samples == 1.0 and num_of_elements == 4 and initial_alphabet_method == 'katsavounidis':
+        #    occurences_l2.append(1)
+        #    print (pathfile)
+        #    trial_info = {'norm': norm}
+        #    norm_values_l2.append(trial_info)
+
+
+
+    print(len(occurences_l1))
+    print(len(occurences_l2))
+
+    norm_values_array_l1 = np.array(sorted(norm_values_l1, key=lambda k: k['norm'], reverse=True))
+    norm_values_array_l1 = np.array([v['norm'] for v in norm_values_array_l1])
+    #norm_values_array_l1 = norm_values_array_l1/np.sqrt((np.sum(np.power(norm_values_array_l1, 2))))
+    plt.plot(norm_values_array_l1, 'r*', label='variance = 0.1')
+
+    ##norm_values_array_l2 = np.array(sorted(norm_values_l2, key=lambda k: k['norm'], reverse=True))
+    ##norm_values_array_l2 = np.array([v['norm'] for v in norm_values_array_l2])
+    #norm_values_array_l2 = norm_values_array_l2/np.sqrt((np.sum(np.power(norm_values_array_l2, 2))))
+    ##plt.plot(norm_values_array_l2, 'g*', label='variance = 1.0')
+
+    plt.legend()
+    
+    plt.show()
+
+    #plt.savefig('results_graph1.png')

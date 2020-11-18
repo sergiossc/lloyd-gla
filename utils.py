@@ -42,10 +42,10 @@ def richscatteringchnmtx(num_tx, num_rx, variance):
     #h = np.sqrt(sigma/2)*np.random.randn(num_tx, num_rx)
     return h
 
-def gen_samples(codebook, num_of_samples, variance, same_samples_for_all=True):
-    if same_samples_for_all:
-        samples_seed = 789
-        np.random.seed(samples_seed)
+def gen_samples(codebook, num_of_samples, variance, seed):
+
+    np.random.seed(seed)
+
     num_rows = np.shape(codebook)[0]
     num_cols = np.shape(codebook)[1]
     samples = []
@@ -54,7 +54,9 @@ def gen_samples(codebook, num_of_samples, variance, same_samples_for_all=True):
             noise = np.sqrt(variance/(2*num_cols)) * (np.random.randn(1, num_cols) + np.random.randn(1, num_cols) * 1j)
             sample = cw + noise
             samples.append(sample)
+
     np.random.seed(None)
+
     return np.array(samples)
 
 def complex_average(samples):
