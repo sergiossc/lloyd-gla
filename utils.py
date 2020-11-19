@@ -359,7 +359,7 @@ def sa(initial_codebook, variance_of_samples, initial_temperature, max_iteractio
         print (current_temperature)
         while current_iteraction < max_iteractions:
             
-            candidate_codebook = gen_samples(initial_codebook, num_of_levels, variance, None)
+            candidate_codebook = gen_samples(initial_codebook, num_of_levels, variance_of_samples, None)
             candidate_lloydcodebook, candidate_sets, candidate_mean_distortion_by_round = lloyd_gla("sa", samples, num_of_levels, lloyd_num_of_interactions, distortion_measure_opt, None, candidate_codebook, None)
             candidate_distortion_by_lloyd_interactions = list(candidate_mean_distortion_by_round[1])
             candidate_distortion = candidate_distortion_by_lloyd_interactions[-1]
@@ -431,7 +431,7 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
             codebook = initial_codebook
         num_of_rounds = 1 # for randomized initial alphabet method only one round is needed
        
-    elif initial_alphabet_opt == 'user_defined':
+    elif initial_alphabet_opt == 'katsavounidis':
         codebook = initial_codebook
         num_of_rounds = 1 # for initial alphabet from user method only one round is needed
 
@@ -453,9 +453,13 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
 
     #    codebook = np.array([samples[i] for i in index_codebook_list])
  
+    elif initial_alphabet_opt == 'xiaoxiao':
+        codebook = initial_codebook
+        num_of_rounds = 1 # for initial alphabet from user method only one round is needed
+
+
     else:
         return None
-
 
     mean_distortion_by_round = {}
     current_codebook_dict = None
@@ -473,7 +477,9 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
             pass
         elif initial_alphabet_opt == 'sa':
             pass
-        elif initial_alphabet_opt == 'user_defined':
+        elif initial_alphabet_opt == 'katsavounidis':
+            pass
+        elif initial_alphabet_opt == 'xiaoxiao':
             pass
         #elif initial_alphabet_opt == 'from_sorted_samples':
         #    pass
@@ -527,7 +533,7 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
       
                     new_cw = new_cw/norm(new_cw)
                 else:
-                    if initial_alphabet_opt == 'random_from_samples' or initial_alphabet_opt == 'sa' or initial_alphabet_opt == 'user_defined':
+                    if initial_alphabet_opt == 'random_from_samples' or initial_alphabet_opt == 'sa' or initial_alphabet_opt == 'katsavounidis' or initial_alphabet_opt == 'xiaoxiao':
                         #new_cw = codebook_dict[cw_id] # Enable this line to keep the cw who has 0 samples, but for a better design it should be removed from codebook.
                         new_cw_index = np.random.choice(len(samples))
                         new_cw = np.array(samples[new_cw_index]) # this is more interesting: if cw had groupped any sample, get another one from samples.

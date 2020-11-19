@@ -1,16 +1,14 @@
 {
     "number_of_elements": [4],
-    "variance_of_samples_values": [0.1, 1.0],
-    "initial_alphabet_opts": ["user_defined"],
-    "initial_alphabet_opts_available": ["user_defined", "sa", "unitary_until_num_of_elements", "random_from_samples"],
-    "distortion_measure_opts": ["mse"],
+    "variance_of_samples_values": [0.1],
+    "initial_alphabet_opts": ["katsavounidis", "xiaoxiao", "sa", "unitary_until_num_of_elements", "random_from_samples"],
+    "initial_alphabet_opts_available": ["katsavounidis", "xiaoxiao", "sa", "unitary_until_num_of_elements", "random_from_samples"],
+    "distortion_measure_opts": ["mse", "gain"],
     "distortion_measure_opts_available": ["mse", "gain"],
-    "num_of_trials": 2,
+    "num_of_trials": 1,
     "num_of_samples": 80,
     "max_num_of_interactions": 1000,
     "results_directory": "/home/snow/code/lloyd-gla/results",
     "percentage_of_sub_samples": 1,
-    "use_same_samples_for_all": false,
-    "initial_alphabet_method": ["katsavounidis"],
-    "initial_alphabet_method_available": ["katsavounidis", "xiaoxiao"]
+    "use_same_samples_for_all": false
 }

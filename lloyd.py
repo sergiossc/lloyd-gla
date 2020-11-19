@@ -29,7 +29,7 @@ def run_lloyd_gla(parm):
     num_of_samples = parm['num_of_samples']
     max_num_of_interactions = parm['max_num_of_interactions']
     percentage_of_sub_samples = parm['percentage_of_sub_samples']
-    initial_alphabet_method = parm['initial_alphabet_method']
+    #initial_alphabet_method = parm['initial_alphabet_method']
     seed = parm['samples_random_seed']
 
     # Saving some information on data dict to (in the end) put it in json file
@@ -42,7 +42,7 @@ def run_lloyd_gla(parm):
     data['num_of_samples'] = num_of_samples
     data['max_num_of_interactions'] = max_num_of_interactions
     data['percentage_of_sub_samples'] = percentage_of_sub_samples
-    data['initial_alphabet_method'] = initial_alphabet_method
+    #data['initial_alphabet_method'] = initial_alphabet_method
 
     dftcodebook = gen_dftcodebook(num_of_elements)
 
@@ -61,39 +61,35 @@ def run_lloyd_gla(parm):
     #initial_codebook = katsavounidis_initial_codebook(samples)
     #print (initial_codebook.shape)
     #plot_codebook(initial_codebook, 'my_initial_codebook_from_katsavounidis_initial_codebook.png')
-    initial_codebook = np.zeros((num_of_elements, num_rows, num_cols), dtype=complex)
+    #initial_codebook = np.zeros((num_of_levels, num_rows, num_cols), dtype=complex)
      
-    if initial_alphabet_opt == 'user_defined':
+    if initial_alphabet_opt == 'xiaoxiao':
 
-        if initial_alphabet_method == 'xiaoxiao':
-            initial_codebook, samples_hadamard = xiaoxiao_initial_codebook(samples)
-            samples = samples_hadamard
-        elif initial_alphabet_method == 'katsavounidis':
-            initial_codebook = katsavounidis_initial_codebook(samples)
-    
+        initial_codebook, samples_hadamard = xiaoxiao_initial_codebook(samples)
+        samples = samples_hadamard
         data['initial_codebook'] = encode_codebook(matrix2dict(initial_codebook))
+        lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, max_num_of_interactions, distortion_measure_opt, None, initial_codebook, None)
+        #lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, max_num_of_interactions, distortion_measure_opt, variance_of_samples, initial_codebook, percentage_of_sub_samples)
+        lloydcodebook = hadamard_transform(lloydcodebook, True)
 
-        # Setup is ready! Now I can run lloyd algotihm according to the initial alphabet option chosen
-        lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, max_num_of_interactions, distortion_measure_opt, variance_of_samples, initial_codebook, percentage_of_sub_samples)
+    elif initial_alphabet_opt == 'katsavounidis':
 
-        if initial_alphabet_opt == 'xiaoxiao':
-            # We have to get inverse transform from hadamard code
-            lloydcodebook = hadamard_transform(lloydcodebook, True)
-        elif initial_alphabet_opt == 'katsavounidis':
-            # There is nothing to do
-            pass
+        initial_codebook = katsavounidis_initial_codebook(samples)
+        data['initial_codebook'] = encode_codebook(matrix2dict(initial_codebook))
+        lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, max_num_of_interactions, distortion_measure_opt, None, initial_codebook, None)
+        #lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, max_num_of_interactions, distortion_measure_opt, variance_of_samples, initial_codebook, percentage_of_sub_samples)
 
     elif initial_alphabet_opt == 'sa':
-        initial_codebook = np.array([samples_normalized[i] for i in np.random.choice(len(samples), num_of_levels, replace=False)])
+        initial_codebook = np.array([samples[i] for i in np.random.choice(len(samples), num_of_levels, replace=False)])
         initial_temperature = 10
         sa_max_num_of_iteractions = 20
         lloydcodebook, sets, mean_distortion_by_round = sa(initial_codebook, variance_of_samples, initial_temperature, sa_max_num_of_iteractions, max_num_of_interactions, distortion_measure_opt, num_of_levels, samples)
 
     elif initial_alphabet_opt == 'unitary_until_num_of_elements':
-        pass
+        lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, max_num_of_interactions, distortion_measure_opt, variance_of_samples, None, percentage_of_sub_samples)
 
     elif initial_alphabet_opt == 'random_from_samples':
-        pass
+        lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, max_num_of_interactions, distortion_measure_opt, variance_of_samples, None, percentage_of_sub_samples)
  
 
     #    #print ('max_distance: ', max_distance)
@@ -164,7 +160,7 @@ if __name__ == '__main__':
 
 
             samples_random_seed = d['samples_random_seed']
-            initial_alphabet_method = d['initial_alphabet_method']
+            #initial_alphabet_method = d['initial_alphabet_method']
 
             #dftcodebook = dict2matrix(decode_codebook(d['dftcodebook']))
             #nrows, ncols = dftcodebook.shape
@@ -175,7 +171,7 @@ if __name__ == '__main__':
             #    initial_codebook = np.array(initial_codebook).reshape(nrows, 1, ncols)
             #print (initial_codebook.shape)
                                 
-            p = {'num_of_elements': n_elements, 'variance_of_samples': variance, 'initial_alphabet_opt':initial_alphabet_opt, 'distortion_measure_opt':distortion_measure_opt, 'num_of_samples':num_of_samples, 'max_num_of_interactions':max_num_of_interactions, 'results_dir': results_dir, 'use_same_samples_for_all': use_same_samples_for_all, 'instance_id': instance_id, 'percentage_of_sub_samples': percentage_of_sub_samples, 'initial_alphabet_method': initial_alphabet_method, 'samples_random_seed': int(samples_random_seed)}
+            p = {'num_of_elements': n_elements, 'variance_of_samples': variance, 'initial_alphabet_opt':initial_alphabet_opt, 'distortion_measure_opt':distortion_measure_opt, 'num_of_samples':num_of_samples, 'max_num_of_interactions':max_num_of_interactions, 'results_dir': results_dir, 'use_same_samples_for_all': use_same_samples_for_all, 'instance_id': instance_id, 'percentage_of_sub_samples': percentage_of_sub_samples, 'samples_random_seed': int(samples_random_seed)}
 
             run_lloyd_gla(p)
 
@@ -201,17 +197,17 @@ if __name__ == '__main__':
         results_dir = d['results_directory'] 
         use_same_samples_for_all = d['use_same_samples_for_all']
         percentage_of_sub_samples = d['percentage_of_sub_samples']
-        initial_alphabet_method = d['initial_alphabet_method']
+        #initial_alphabet_method = d['initial_alphabet_method']
     
         parms = []
         for n_elements in num_of_elements:
             for variance in variance_of_samples_values:
                 for initial_alphabet_opt in initial_alphabet_opts:
                     for distortion_measure_opt in distortion_measure_opts:
-                        for initial_alphabet_method_opt in initial_alphabet_method:
-                            for n in range(num_of_trials):
-                                p = {'num_of_elements': n_elements, 'variance_of_samples': variance, 'initial_alphabet_opt':initial_alphabet_opt, 'distortion_measure_opt':distortion_measure_opt, 'num_of_samples':num_of_samples, 'max_num_of_interactions':max_num_of_interactions, 'results_dir': results_dir, 'use_same_samples_for_all': use_same_samples_for_all, 'instance_id': str(uuid.uuid4()), 'percentage_of_sub_samples': percentage_of_sub_samples, 'initial_alphabet_method': initial_alphabet_method_opt}
-                                parms.append(p)
+                        #for initial_alphabet_method_opt in initial_alphabet_method:
+                        for n in range(num_of_trials):
+                            p = {'num_of_elements': n_elements, 'variance_of_samples': variance, 'initial_alphabet_opt':initial_alphabet_opt, 'distortion_measure_opt':distortion_measure_opt, 'num_of_samples':num_of_samples, 'max_num_of_interactions':max_num_of_interactions, 'results_dir': results_dir, 'use_same_samples_for_all': use_same_samples_for_all, 'instance_id': str(uuid.uuid4()), 'percentage_of_sub_samples': percentage_of_sub_samples}
+                            parms.append(p)
         
         if use_same_samples_for_all:
             random_seeds = np.ones(len(parms)) * 789
@@ -226,6 +222,7 @@ if __name__ == '__main__':
         
         print ('# of cpus: ', os.cpu_count())
         print ('# of parms: ', len(parms))
+        print ('parms: ', parms)
         
         with concurrent.futures.ProcessPoolExecutor() as e:
             for p, r in zip(parms, e.map(run_lloyd_gla, parms)):
