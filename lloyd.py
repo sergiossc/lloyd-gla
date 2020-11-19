@@ -222,7 +222,6 @@ if __name__ == '__main__':
         
         print ('# of cpus: ', os.cpu_count())
         print ('# of parms: ', len(parms))
-        print ('parms: ', parms)
         
         with concurrent.futures.ProcessPoolExecutor() as e:
             for p, r in zip(parms, e.map(run_lloyd_gla, parms)):
