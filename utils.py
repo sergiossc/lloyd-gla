@@ -398,7 +398,8 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
         This method implements Lloyd algorithm. There are two options of initial reconstruct alphabet: (1) begining a unitary codebook and duplicate it in each round. The number of rounds is log2(num_of_levels). And (2) randomized initial reconstruct alphabet from samples.
     """
     if initial_alphabet_opt == 'unitary_until_num_of_elements':
-        cw0 = complex_average(samples) # The inicial unitary codebook is a average of all samples
+        #cw0 = complex_average(samples) # The inicial unitary codebook is a average of all samples
+        cw0 = initial_codebook # The inicial unitary codebook is a average of all samples
         #plot_unitary_codebook(cw0, 'initial_codebook.png')
         cw0_shape = np.shape(cw0)
         codebook = []    
@@ -420,15 +421,17 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
         
 
     elif initial_alphabet_opt == 'random_from_samples':
-        initial_codebook_from_samples = [samples[i] for i in np.random.choice(len(samples), num_of_levels, replace=False)]
-        codebook = np.array(initial_codebook_from_samples)
+        #initial_codebook_from_samples = [samples[i] for i in np.random.choice(len(samples), num_of_levels, replace=False)]
+        initial_codebook_from_samples = initial_codebook 
+        #codebook = np.array(initial_codebook_from_samples)
+        codebook = initial_codebook_from_samples
         num_of_rounds = 1 # for randomized initial alphabet method only one round is needed
 
     elif initial_alphabet_opt == 'sa':
-        if initial_codebook.all() == None:
-            codebook = np.array([samples[i] for i in np.random.choice(len(samples), num_of_levels, replace=False)])
-        else:
-            codebook = initial_codebook
+        #if initial_codebook.all() == None:
+        #    codebook = np.array([samples[i] for i in np.random.choice(len(samples), num_of_levels, replace=False)])
+        #else:
+        codebook = initial_codebook
         num_of_rounds = 1 # for randomized initial alphabet method only one round is needed
        
     elif initial_alphabet_opt == 'katsavounidis':

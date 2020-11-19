@@ -23,20 +23,17 @@ def run_lloyd_gla(parm):
     # Getting information from params
     num_of_elements = parm['num_of_elements']
     variance_of_samples = parm['variance_of_samples']
-    #use_same_samples_for_all = parm['use_same_samples_for_all']
     initial_alphabet_opt = parm['initial_alphabet_opt']
     distortion_measure_opt = parm['distortion_measure_opt']
     num_of_samples = parm['num_of_samples']
     max_num_of_interactions = parm['max_num_of_interactions']
     percentage_of_sub_samples = parm['percentage_of_sub_samples']
-    #initial_alphabet_method = parm['initial_alphabet_method']
     samples_random_seed = parm['samples_random_seed']
     trial_random_seed = parm['trial_random_seed']
 
     # Saving some information on data dict to (in the end) put it in json file
     data['num_of_elements'] = num_of_elements
     data['variance_of_samples'] = variance_of_samples
-    #data['use_same_samples_for_all'] = use_same_samples_for_all
     data['samples_random_seed'] = float(samples_random_seed)
     data['trial_random_seed'] = float(trial_random_seed)
     data['initial_alphabet_opt'] = initial_alphabet_opt
@@ -44,12 +41,8 @@ def run_lloyd_gla(parm):
     data['num_of_samples'] = num_of_samples
     data['max_num_of_interactions'] = max_num_of_interactions
     data['percentage_of_sub_samples'] = percentage_of_sub_samples
-    #data['initial_alphabet_method'] = initial_alphabet_method
 
     dftcodebook = gen_dftcodebook(num_of_elements)
-
-    #dftcodebook = np.array([cw for cw  in dftcodebook])
-    #plot_codebook(dftcodebook, 'dftcodebook.png')
 
     data['dftcodebook'] = encode_codebook(matrix2dict(dftcodebook))
     
@@ -62,19 +55,13 @@ def run_lloyd_gla(parm):
     # Controlling randomness from trial by seed to make possible reproduce it later
     np.random.seed(trial_random_seed)
    
-    num_samples, num_rows, num_cols = samples.shape
-    #initial_codebook = katsavounidis_initial_codebook(samples)
-    #print (initial_codebook.shape)
-    #plot_codebook(initial_codebook, 'my_initial_codebook_from_katsavounidis_initial_codebook.png')
-    #initial_codebook = np.zeros((num_of_levels, num_rows, num_cols), dtype=complex)
-     
+    # Starting lloyd with an specific initial alphabet opt
     if initial_alphabet_opt == 'xiaoxiao':
 
         initial_codebook, samples_hadamard = xiaoxiao_initial_codebook(samples)
         samples = samples_hadamard
         data['initial_codebook'] = encode_codebook(matrix2dict(initial_codebook))
         lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, max_num_of_interactions, distortion_measure_opt, None, initial_codebook, None)
-        #lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, max_num_of_interactions, distortion_measure_opt, variance_of_samples, initial_codebook, percentage_of_sub_samples)
         lloydcodebook = hadamard_transform(lloydcodebook, True)
 
     elif initial_alphabet_opt == 'katsavounidis':
@@ -82,49 +69,27 @@ def run_lloyd_gla(parm):
         initial_codebook = katsavounidis_initial_codebook(samples)
         data['initial_codebook'] = encode_codebook(matrix2dict(initial_codebook))
         lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, max_num_of_interactions, distortion_measure_opt, None, initial_codebook, None)
-        #lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, max_num_of_interactions, distortion_measure_opt, variance_of_samples, initial_codebook, percentage_of_sub_samples)
 
     elif initial_alphabet_opt == 'sa':
         initial_codebook = np.array([samples[i] for i in np.random.choice(len(samples), num_of_levels, replace=False)])
+        data['initial_codebook'] = encode_codebook(matrix2dict(initial_codebook))
         initial_temperature = 10
         sa_max_num_of_iteractions = 20
         lloydcodebook, sets, mean_distortion_by_round = sa(initial_codebook, variance_of_samples, initial_temperature, sa_max_num_of_iteractions, max_num_of_interactions, distortion_measure_opt, num_of_levels, samples)
 
     elif initial_alphabet_opt == 'unitary_until_num_of_elements':
-        lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, max_num_of_interactions, distortion_measure_opt, variance_of_samples, None, percentage_of_sub_samples)
+        initial_codebook = complex_average(samples)
+        data['initial_codebook'] = encode_codebook(matrix2dict(initial_codebook))
+        lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, max_num_of_interactions, distortion_measure_opt, variance_of_samples, initial_codebook, percentage_of_sub_samples)
 
     elif initial_alphabet_opt == 'random_from_samples':
-        lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, max_num_of_interactions, distortion_measure_opt, variance_of_samples, None, percentage_of_sub_samples)
+        initial_codebook = np.array([samples[i] for i in np.random.choice(len(samples), num_of_levels, replace=False)])
+        data['initial_codebook'] = encode_codebook(matrix2dict(initial_codebook))
+        lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, max_num_of_interactions, distortion_measure_opt, variance_of_samples, initial_codebook, percentage_of_sub_samples)
  
 
-    #    #print ('max_distance: ', max_distance)
-    #print ('initial_codebook: \n', initial_codebook)
-    #    max_sample = max_distance_sample
-
-    #plot_codebook(initial_codebook, 'initial_codebook_from_' + str(initial_alphabet_method) + '_' + str(instance_id) + '_paper.png')
-
-    #samples_avg = complex_average(samples)
-
-    ##samples = [richscatteringchnmtx(num_of_elements, 1, variance_of_samples) for i in range(num_of_samples)]
-    ##samples = np.array(samples)
-    
-    #samples_normalized = np.array([sample/norm(sample) for sample  in samples])
-    #samples_sorted, attr_sorted = sorted_samples(samples, 'stddev')
-
-    ##samples_sorted_avg, attr_sorted_avg = sorted_samples(samples, 'avg_xiaoxiao')
-    ##samples_sorted_var, attr_sorted_var = sorted_samples(samples, 'var_xiaoxiao')
-    
-    ##plot_filename_avg = 'plot_samples_avg_nt16_ordered_' + str(instance_id) + '.png'
-    ##plot_filename_var = 'plot_samples_var_nt16_ordered_' + str(instance_id) + '.png'
-
-    #plot_samples(attr_sorted_avg, plot_filename_avg, r'$abs(m_x)$', 'abs(m_x)')
-    ##plot_samples(attr_sorted_avg, plot_filename_avg, r'Samples in ascending order by $abs(m_x)$: $N_r = 1$, $N_t = 16$, $k = $' + str(num_of_samples), r'$abs(m_x)$')
-    ##plot_samples(attr_sorted_var, plot_filename_var, r'Samples in ascending order by $var_x$: $N_r = 1$, $N_t = 16$, $k = $' + str(num_of_samples), r'$var_x$')
-
-
-
-
     ##plot_performance(mean_distortion_by_round, 'MSE as distortion', 'distortion.png')
+
     # Saving results in JSON file 
     data['lloydcodebook'] = encode_codebook(matrix2dict(lloydcodebook))
     data['sets'] = encode_sets(sets)
@@ -145,7 +110,7 @@ if __name__ == '__main__':
         if not os.path.isfile(trial_pathfile):
             print('Wrong trial pathfile')
         else:
-            print('re-trial begin_________________________________')
+            print('Re-trial begin_________________________________')
 
             with open(trial_pathfile) as trial_results:
                 data = trial_results.read()
@@ -167,24 +132,38 @@ if __name__ == '__main__':
 
             samples_random_seed = d['samples_random_seed']
             trial_random_seed = d['trial_random_seed']
-            #initial_alphabet_method = d['initial_alphabet_method']
 
-            #dftcodebook = dict2matrix(decode_codebook(d['dftcodebook']))
-            #nrows, ncols = dftcodebook.shape
 
-            #initial_codebook = np.zeros((nrows, 1, ncols),dtype=complex)
-            #if initial_alphabet_opt == 'user_defined':
-            #    initial_codebook = dict2matrix(decode_codebook(d['initial_codebook'])) 
-            #    initial_codebook = np.array(initial_codebook).reshape(nrows, 1, ncols)
-            #print (initial_codebook.shape)
-                                
-            #p = {'num_of_elements': n_elements, 'variance_of_samples': variance, 'initial_alphabet_opt':initial_alphabet_opt, 'distortion_measure_opt':distortion_measure_opt, 'num_of_samples':num_of_samples, 'max_num_of_interactions':max_num_of_interactions, 'results_dir': results_dir, 'use_same_samples_for_all': use_same_samples_for_all, 'instance_id': instance_id, 'percentage_of_sub_samples': percentage_of_sub_samples, 'samples_random_seed': int(samples_random_seed), 'trial_random_seed': trial_random_seed}
+            lloydcodebook_dict = decode_codebook(d['lloydcodebook'])
+            initialcodebook_dict = decode_codebook(d['initial_codebook'])
+
+            lloydcodebook_matrix = dict2matrix(lloydcodebook_dict)
+            initialcodebook_matrix = dict2matrix(initialcodebook_dict)
+
+            lloyd_nrows, lloyd_ncols = lloydcodebook_matrix.shape
+            lloydcodebook_matrix = np.array(lloydcodebook_matrix).reshape(lloyd_nrows, 1, lloyd_ncols)
+            plot_lloydcodebook_filename =  'lloyd_codebook_from_'+ instance_id  +'.png'
+            print('-- plot lloyd final codebook saved in: ', plot_lloydcodebook_filename)
+            plot_codebook(lloydcodebook_matrix, plot_lloydcodebook_filename)
+            print ('-- done!')
+
+            initial_nrows, initial_ncols = initialcodebook_matrix.shape
+            initialcodebook_matrix = np.array(initialcodebook_matrix).reshape(initial_nrows, 1, initial_ncols)
+            plot_initialcodebook_filename = 'initial_codebook_from_' + instance_id + '.png'
+            print ('-- plot initial codiedbook saved in: ', plot_initialcodebook_filename)
+            plot_codebook(initialcodebook_matrix, plot_initialcodebook_filename)
+            print ('-- done!')
+
 
             p = {'num_of_elements': n_elements, 'variance_of_samples': variance, 'initial_alphabet_opt':initial_alphabet_opt, 'distortion_measure_opt':distortion_measure_opt, 'num_of_samples':num_of_samples, 'max_num_of_interactions':max_num_of_interactions, 'results_dir': results_dir, 'instance_id': instance_id, 'percentage_of_sub_samples': percentage_of_sub_samples, 'samples_random_seed': int(samples_random_seed), 'trial_random_seed': int(trial_random_seed)}
+
+            print ('running it again... ')
             run_lloyd_gla(p)
+            print ('done!')
 
             print (p)
-            print('re-trial end_________________________________')
+
+            print('Re-trial end_________________________________')
 
 
     else:  
@@ -205,14 +184,13 @@ if __name__ == '__main__':
         results_dir = d['results_directory'] 
         use_same_samples_for_all = d['use_same_samples_for_all']
         percentage_of_sub_samples = d['percentage_of_sub_samples']
-        #initial_alphabet_method = d['initial_alphabet_method']
     
         parms = []
         for n_elements in num_of_elements:
             for variance in variance_of_samples_values:
                 for initial_alphabet_opt in initial_alphabet_opts:
                     for distortion_measure_opt in distortion_measure_opts:
-                        #for initial_alphabet_method_opt in initial_alphabet_method:
+
                         if use_same_samples_for_all:
                             np.random.seed(789)
                             random_seeds = np.random.choice(100000, num_of_trials, replace=False)
@@ -227,7 +205,6 @@ if __name__ == '__main__':
         
         print ('# of cpus: ', os.cpu_count())
         print ('# of parms: ', len(parms))
-        print ('parms: ', parms)
         
         with concurrent.futures.ProcessPoolExecutor() as e:
             for p, r in zip(parms, e.map(run_lloyd_gla, parms)):
