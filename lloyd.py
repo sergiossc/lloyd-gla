@@ -23,20 +23,22 @@ def run_lloyd_gla(parm):
     # Getting information from params
     num_of_elements = parm['num_of_elements']
     variance_of_samples = parm['variance_of_samples']
-    use_same_samples_for_all = parm['use_same_samples_for_all']
+    #use_same_samples_for_all = parm['use_same_samples_for_all']
     initial_alphabet_opt = parm['initial_alphabet_opt']
     distortion_measure_opt = parm['distortion_measure_opt']
     num_of_samples = parm['num_of_samples']
     max_num_of_interactions = parm['max_num_of_interactions']
     percentage_of_sub_samples = parm['percentage_of_sub_samples']
     #initial_alphabet_method = parm['initial_alphabet_method']
-    seed = parm['samples_random_seed']
+    samples_random_seed = parm['samples_random_seed']
+    trial_random_seed = parm['trial_random_seed']
 
     # Saving some information on data dict to (in the end) put it in json file
     data['num_of_elements'] = num_of_elements
     data['variance_of_samples'] = variance_of_samples
-    data['use_same_samples_for_all'] = use_same_samples_for_all
-    data['samples_random_seed'] = float(seed)
+    #data['use_same_samples_for_all'] = use_same_samples_for_all
+    data['samples_random_seed'] = float(samples_random_seed)
+    data['trial_random_seed'] = float(trial_random_seed)
     data['initial_alphabet_opt'] = initial_alphabet_opt
     data['distortion_measure_opt'] = distortion_measure_opt
     data['num_of_samples'] = num_of_samples
@@ -55,7 +57,10 @@ def run_lloyd_gla(parm):
     num_of_levels = num_of_elements
 
     # Creating samples
-    samples = gen_samples(dftcodebook, num_of_samples, variance_of_samples, seed)
+    samples = gen_samples(dftcodebook, num_of_samples, variance_of_samples, samples_random_seed)
+
+    # Controlling randomness from trial by seed to make possible reproduce it later
+    np.random.seed(trial_random_seed)
    
     num_samples, num_rows, num_cols = samples.shape
     #initial_codebook = katsavounidis_initial_codebook(samples)
@@ -140,7 +145,7 @@ if __name__ == '__main__':
         if not os.path.isfile(trial_pathfile):
             print('Wrong trial pathfile')
         else:
-            print('trial begin_________________________________')
+            print('re-trial begin_________________________________')
 
             with open(trial_pathfile) as trial_results:
                 data = trial_results.read()
@@ -148,6 +153,7 @@ if __name__ == '__main__':
         
             # Read information from 'profile.json' file
             instance_id = 'retrial_of_' + d['instance_id']
+            print (instance_id)
             n_elements = d['num_of_elements']
             variance = d['variance_of_samples']
             initial_alphabet_opt = d['initial_alphabet_opt']
@@ -155,11 +161,12 @@ if __name__ == '__main__':
             num_of_samples = d['num_of_samples']
             max_num_of_interactions = d['max_num_of_interactions']
             results_dir = d['results_dir']
-            use_same_samples_for_all = d['use_same_samples_for_all']
+            #use_same_samples_for_all = d['use_same_samples_for_all']
             percentage_of_sub_samples = d['percentage_of_sub_samples']
 
 
             samples_random_seed = d['samples_random_seed']
+            trial_random_seed = d['trial_random_seed']
             #initial_alphabet_method = d['initial_alphabet_method']
 
             #dftcodebook = dict2matrix(decode_codebook(d['dftcodebook']))
@@ -171,12 +178,13 @@ if __name__ == '__main__':
             #    initial_codebook = np.array(initial_codebook).reshape(nrows, 1, ncols)
             #print (initial_codebook.shape)
                                 
-            p = {'num_of_elements': n_elements, 'variance_of_samples': variance, 'initial_alphabet_opt':initial_alphabet_opt, 'distortion_measure_opt':distortion_measure_opt, 'num_of_samples':num_of_samples, 'max_num_of_interactions':max_num_of_interactions, 'results_dir': results_dir, 'use_same_samples_for_all': use_same_samples_for_all, 'instance_id': instance_id, 'percentage_of_sub_samples': percentage_of_sub_samples, 'samples_random_seed': int(samples_random_seed)}
+            #p = {'num_of_elements': n_elements, 'variance_of_samples': variance, 'initial_alphabet_opt':initial_alphabet_opt, 'distortion_measure_opt':distortion_measure_opt, 'num_of_samples':num_of_samples, 'max_num_of_interactions':max_num_of_interactions, 'results_dir': results_dir, 'use_same_samples_for_all': use_same_samples_for_all, 'instance_id': instance_id, 'percentage_of_sub_samples': percentage_of_sub_samples, 'samples_random_seed': int(samples_random_seed), 'trial_random_seed': trial_random_seed}
 
+            p = {'num_of_elements': n_elements, 'variance_of_samples': variance, 'initial_alphabet_opt':initial_alphabet_opt, 'distortion_measure_opt':distortion_measure_opt, 'num_of_samples':num_of_samples, 'max_num_of_interactions':max_num_of_interactions, 'results_dir': results_dir, 'instance_id': instance_id, 'percentage_of_sub_samples': percentage_of_sub_samples, 'samples_random_seed': int(samples_random_seed), 'trial_random_seed': int(trial_random_seed)}
             run_lloyd_gla(p)
 
             print (p)
-            print('trial end_________________________________')
+            print('re-trial end_________________________________')
 
 
     else:  
@@ -205,23 +213,21 @@ if __name__ == '__main__':
                 for initial_alphabet_opt in initial_alphabet_opts:
                     for distortion_measure_opt in distortion_measure_opts:
                         #for initial_alphabet_method_opt in initial_alphabet_method:
+                        if use_same_samples_for_all:
+                            np.random.seed(789)
+                            random_seeds = np.random.choice(100000, num_of_trials, replace=False)
+                            np.random.seed(None)
+                        else:
+                            random_seeds = np.random.choice(100000, num_of_trials, replace=False)
+                            
                         for n in range(num_of_trials):
-                            p = {'num_of_elements': n_elements, 'variance_of_samples': variance, 'initial_alphabet_opt':initial_alphabet_opt, 'distortion_measure_opt':distortion_measure_opt, 'num_of_samples':num_of_samples, 'max_num_of_interactions':max_num_of_interactions, 'results_dir': results_dir, 'use_same_samples_for_all': use_same_samples_for_all, 'instance_id': str(uuid.uuid4()), 'percentage_of_sub_samples': percentage_of_sub_samples}
+                            p = {'num_of_elements': n_elements, 'variance_of_samples': variance, 'initial_alphabet_opt':initial_alphabet_opt, 'distortion_measure_opt':distortion_measure_opt, 'num_of_samples':num_of_samples, 'max_num_of_interactions':max_num_of_interactions, 'results_dir': results_dir, 'instance_id': str(uuid.uuid4()), 'percentage_of_sub_samples': percentage_of_sub_samples, 'samples_random_seed': random_seeds[n], 'trial_random_seed': np.random.choice(10000, 1)[0]}
                             parms.append(p)
         
-        if use_same_samples_for_all:
-            random_seeds = np.ones(len(parms)) * 789
-            random_seeds = np.array([int(v) for v in random_seeds])
-        else: 
-            random_seeds = np.random.choice(100000, len(parms), replace=False)
-        
-        for n in range(len(parms)): 
-            p = parms[n]
-            seed = random_seeds[n]
-            p['samples_random_seed'] = seed
         
         print ('# of cpus: ', os.cpu_count())
         print ('# of parms: ', len(parms))
+        print ('parms: ', parms)
         
         with concurrent.futures.ProcessPoolExecutor() as e:
             for p, r in zip(parms, e.map(run_lloyd_gla, parms)):

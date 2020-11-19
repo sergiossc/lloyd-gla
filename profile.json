@@ -6,7 +6,7 @@
     "distortion_measure_opts": ["mse"],
     "distortion_measure_opts_available": ["mse", "gain"],
     "num_of_trials": 1,
-    "num_of_samples": 8000,
+    "num_of_samples": 80,
     "max_num_of_interactions": 1000,
     "results_directory": "/home/snow/code/lloyd-gla/results",
     "percentage_of_sub_samples": 1,
