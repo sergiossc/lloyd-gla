@@ -724,4 +724,31 @@ def hadamard_transform(samples, inverse=False):
     return samples_converted
   
 
+def check_files(prefix, episodefiles):
+    pathfiles = {}
+    for ep_file in episodefiles:
+        pathfile = prefix + str('/') + str(ep_file)
+        ep_file_status = False
+        try:
+            current_file = open(pathfile)
+            ep_file_status = True
+            #print("Sucess.")
+        except IOError:
+            print("File not accessible: ", pathfile)
+        finally:
+            current_file.close()
+
+        if ep_file_status:
+            ep_file_id = uuid.uuid4()
+            pathfiles[ep_file_id] = pathfile
+ 
+    return pathfiles
+
+
+def decode_mean_distortion(mean_distortion_dict):
+    mean_distortion_list = []
+    for iteration, mean_distortion in mean_distortion_dict.items():
+        mean_distortion_list.append(mean_distortion)
+    return mean_distortion_list
+
 

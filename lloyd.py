@@ -59,10 +59,10 @@ def run_lloyd_gla(parm):
     if initial_alphabet_opt == 'xiaoxiao':
 
         initial_codebook, samples_hadamard = xiaoxiao_initial_codebook(samples)
-        samples = samples_hadamard
+        #samples = samples_hadamard
         data['initial_codebook'] = encode_codebook(matrix2dict(initial_codebook))
         lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, max_num_of_interactions, distortion_measure_opt, None, initial_codebook, None)
-        lloydcodebook = hadamard_transform(lloydcodebook, True)
+        #lloydcodebook = hadamard_transform(lloydcodebook, True)
 
     elif initial_alphabet_opt == 'katsavounidis':
 
