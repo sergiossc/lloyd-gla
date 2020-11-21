@@ -158,16 +158,16 @@ if __name__ == '__main__':
     
     fig, ax = plt.subplots()
 
-    rects1 = ax.bar(x - width, katsavounidis_v, width, label='katsavounidis')
-    rects2 = ax.bar(x - 1 * width/2, xiaoxiao_v, width, label='xiaoxiao')
-    rects3 = ax.bar(x + width, sa_v, width, label='sa')
-    rects4 = ax.bar(x + 1 * width/2, unitary_until_num_of_elements_v, width, label='unitary')
-    rects5 = ax.bar(x + 2 * width/2, random_from_samples_v, width, label='random')
+    rects1 = ax.bar(x + width, katsavounidis_v, width, label='katsavounidis')
+    rects2 = ax.bar(x + 2 * width, xiaoxiao_v, width, label='xiaoxiao')
+    rects3 = ax.bar(x + 3 * width, sa_v, width, label='sa')
+    rects4 = ax.bar(x + 4 * width, unitary_until_num_of_elements_v, width, label='unitary')
+    rects5 = ax.bar(x + 5 * width, random_from_samples_v, width, label='random')
 
 
     ax.set_ylabel('Minimal distortion')
     ax.set_xlabel('Seed samples from trials')
-    ax.set_title('Minimal distortion by initial alphabet method - Nt = 4')
+    ax.set_title('Minimal distortion by initial alphabet method - Nt = 16, k = 8000, var = 1.0')
     ax.set_xticks(x)
     ax.set_xticklabels(labels)
     ax.legend()
