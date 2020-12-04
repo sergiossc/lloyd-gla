@@ -138,38 +138,95 @@ if __name__ == '__main__':
 
     labels = samples_random_seeds_k
 
+    intervallist = []
+    k = 1.96
+
+    # ---------------------------katsavounivis--------------------------------------
     katsavounidis_results = katsavounidis_results.items()
     katsavounidis_v = np.array([float(v[1]) for v in sorted(katsavounidis_results)])
 
+    katsavounidis_mean = np.mean(katsavounidis_v)
+    katsavounidis_var = np.mean((katsavounidis_v - katsavounidis_mean) ** 2)
+    katsavounidis_stddev = np.sqrt(katsavounidis_var)
+    katsavounidis_upbound = katsavounidis_mean + k * katsavounidis_stddev/np.sqrt(len(katsavounidis_results))
+    katsavounidis_lowbound = katsavounidis_mean - k * katsavounidis_stddev/np.sqrt(len(katsavounidis_results))
+    intervallist.append([katsavounidis_lowbound, katsavounidis_mean, katsavounidis_upbound])
+
+    #---------------------------xiaoxiao-----------------------------------------------
     xiaoxiao_results = xiaoxiao_results.items()
     xiaoxiao_v = np.array([float(v[1]) for v in sorted(xiaoxiao_results)])
+    xiaoxiao_mean = np.mean([float(v[1]) for v in sorted(xiaoxiao_results)])
 
+    xiaoxiao_mean = np.mean(xiaoxiao_v)
+    xiaoxiao_var = np.mean((xiaoxiao_v - xiaoxiao_mean) ** 2)
+    xiaoxiao_stddev = np.sqrt(xiaoxiao_var)
+    xiaoxiao_upbound = xiaoxiao_mean + k * xiaoxiao_stddev/np.sqrt(len(xiaoxiao_results))
+    xiaoxiao_lowbound = xiaoxiao_mean - k * xiaoxiao_stddev/np.sqrt(len(xiaoxiao_results))
+    intervallist.append([xiaoxiao_lowbound, xiaoxiao_mean, xiaoxiao_upbound])
+
+
+
+    #---------------------------sa-----------------------------------------------
     sa_results = sa_results.items()
     sa_v = np.array([float(v[1]) for v in sorted(sa_results)])
+    sa_mean = np.mean([float(v[1]) for v in sorted(sa_results)])
 
+    sa_mean = np.mean(sa_v)
+    sa_var = np.mean((sa_v - sa_mean) ** 2)
+    sa_stddev = np.sqrt(sa_var)
+    sa_upbound = sa_mean + k * sa_stddev/np.sqrt(len(sa_results))
+    sa_lowbound = sa_mean - k * sa_stddev/np.sqrt(len(sa_results))
+
+    intervallist.append([sa_lowbound, sa_mean, sa_upbound])
+
+
+    #---------------------------unitary_until_num_of_elements-----------------------------------------------
     unitary_until_num_of_elements_results = unitary_until_num_of_elements_results.items()
     unitary_until_num_of_elements_v = np.array([float(v[1]) for v in sorted(unitary_until_num_of_elements_results)])
+    unitary_until_num_of_elements_mean = np.mean([float(v[1]) for v in sorted(unitary_until_num_of_elements_results)])
 
+    unitary_until_num_of_elements_mean = np.mean(unitary_until_num_of_elements_v)
+    unitary_until_num_of_elements_var = np.mean((unitary_until_num_of_elements_v - unitary_until_num_of_elements_mean) ** 2)
+    unitary_until_num_of_elements_stddev = np.sqrt(unitary_until_num_of_elements_var)
+    unitary_until_num_of_elements_upbound = unitary_until_num_of_elements_mean + k * unitary_until_num_of_elements_stddev/np.sqrt(len(unitary_until_num_of_elements_results))
+    unitary_until_num_of_elements_lowbound = unitary_until_num_of_elements_mean - k * unitary_until_num_of_elements_stddev/np.sqrt(len(unitary_until_num_of_elements_results))
+
+
+    intervallist.append([unitary_until_num_of_elements_lowbound, unitary_until_num_of_elements_mean, unitary_until_num_of_elements_upbound])
+
+
+    #---------------------------random_from_samples-----------------------------------------------
     random_from_samples_results = random_from_samples_results.items()
     random_from_samples_v = np.array([float(v[1]) for v in sorted(random_from_samples_results)])
+    random_from_samples_mean = np.mean([float(v[1]) for v in sorted(random_from_samples_results)])
 
-    x = np.arange(len(labels))
-    width = 0.1
+    random_from_samples_mean = np.mean(random_from_samples_v)
+    random_from_samples_var = np.mean((random_from_samples_v - random_from_samples_mean) ** 2)
+    random_from_samples_stddev = np.sqrt(random_from_samples_var)
+    random_from_samples_upbound = random_from_samples_mean + k * random_from_samples_stddev/np.sqrt(len(random_from_samples_results))
+    random_from_samples_lowbound = random_from_samples_mean - k * random_from_samples_stddev/np.sqrt(len(random_from_samples_results))
+
+
+    intervallist.append([random_from_samples_lowbound, random_from_samples_mean, random_from_samples_upbound])
+
+    #x = np.arange(len(labels))
+    x = np.arange(1)
+    width = 0.001
     
     fig, ax = plt.subplots()
 
-    rects1 = ax.bar(x + width, katsavounidis_v, width, label='katsavounidis')
-    rects2 = ax.bar(x + 2 * width, xiaoxiao_v, width, label='xiaoxiao')
-    rects3 = ax.bar(x + 3 * width, sa_v, width, label='sa')
-    rects4 = ax.bar(x + 4 * width, unitary_until_num_of_elements_v, width, label='unitary')
-    rects5 = ax.bar(x + 5 * width, random_from_samples_v, width, label='random')
+    rects1 = ax.bar(x + width, katsavounidis_mean, width, label='katsavounidis', yerr=katsavounidis_stddev)
+    rects2 = ax.bar(x + 2 * width, xiaoxiao_mean, width, label='xiaoxiao', yerr=xiaoxiao_stddev)
+    rects3 = ax.bar(x + 3 * width, sa_mean, width, label='sa', yerr=sa_stddev)
+    rects4 = ax.bar(x + 4 * width, unitary_until_num_of_elements_mean, width, label='unitary', yerr=unitary_until_num_of_elements_stddev)
+    rects5 = ax.bar(x + 5 * width, random_from_samples_mean, width, label='random', yerr=random_from_samples_stddev)
 
 
     ax.set_ylabel('Minimal distortion')
     ax.set_xlabel('Seed samples from trials')
     ax.set_title('Minimal distortion by initial alphabet method - Nt = 16, k = 8000, var = 1.0')
     ax.set_xticks(x)
-    ax.set_xticklabels(labels)
+    #ax.set_xticklabels(labels)
     ax.legend()
 
     plt.show()
