@@ -169,7 +169,8 @@ if __name__ == '__main__':
     ax.set_xlabel('Seed samples from trials')
     ax.set_title('Minimal distortion by initial alphabet method - Nt = 16, k = 8000, var = 1.0')
     ax.set_xticks(x)
-    ax.set_xticklabels(labels)
+    #ax.set_xticklabels(labels)
+    ax.set_xticklabels(x)
     ax.legend()
 
     plt.show()
