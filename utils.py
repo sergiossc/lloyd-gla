@@ -744,11 +744,34 @@ def check_files(prefix, episodefiles):
  
     return pathfiles
 
-
 def decode_mean_distortion(mean_distortion_dict):
     mean_distortion_list = []
     for iteration, mean_distortion in mean_distortion_dict.items():
         mean_distortion_list.append(mean_distortion)
     return mean_distortion_list
+
+def get_confidence_interval(results_values, t):
+    """
+    [1] Confidence Intervals for Unknown Mean and Unknown Standard 
+    Deviation <http://www.stat.yale.edu/Courses/1997-98/101/confint.htm>
+
+    [2] Jain, R.; "The Art of Computer Systems Performance Analysis -
+    Techniques for Experimental Design, Measurement, Simulation, and
+    Modeling"; 1st edition; John Wiley & Sons, Inc.; 1991.
+
+    """
+    mean = np.mean(results_values)
+    var = np.mean((results_values - mean) ** 2)
+    se = np.sqrt(var) # Standard Error
+    upbound = mean + t * se/np.sqrt(len(results_values))
+    lowbound = mean - t * se/np.sqrt(len(results_values))
+    return [lowbound, mean, upbound]
+
+def get_percentiles(results_values):
+    first_percentile = np.percentile(results_values, 25) 
+    median = np.percentile(results_values, 50) 
+    third_percentile = np.percentile(results_values, 75) 
+    iqr = third_percentile - first_percentile
+    return first_percentile, median, third_percentile, iqr
 
 
