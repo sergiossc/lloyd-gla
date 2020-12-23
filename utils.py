@@ -394,7 +394,8 @@ def sa(initial_codebook, variance_of_samples, initial_temperature, max_iteractio
 def run_lloyd_gla(parm):
     instance_id = parm['instance_id']
     results_dir = parm['results_dir']
-    json_filename = str(results_dir) + '/' + str(instance_id) + '.json'
+    #json_filename = str(results_dir) + '/' + str(instance_id) + '.json'
+    json_filename = 'result_' + str(instance_id) + '.json'
 
     data = {}
     data['instance_id'] = str(instance_id)
