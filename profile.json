@@ -8,7 +8,7 @@
     "num_of_trials": 10,
     "num_of_samples": 8000,
     "max_num_of_interactions": 1000,
-    "results_directory": "/home/snow/code/lloyd-gla/results",
+    "results_directory": "/home/snow/github/land/lloyd-gla/results",
     "percentage_of_sub_samples": 1,
     "use_same_samples_for_all": true
 }

@@ -180,8 +180,6 @@ if __name__ == '__main__':
     #sa_1st_percentile, sa_median, sa_3rd_percentile, sa_iqr = get_percentiles(sa_v)
     #unitary_until_num_of_elements_1st_percentile, unitary_until_num_of_elements_median, unitary_until_num_of_elements_3rd_percentile, unitary_until_num_of_elements_iqr = get_percentiles(unitary_until_num_of_elements_v)
     #random_from_samples_1st_percentile, random_from_samples_median, random_from_samples_3rd_percentile, random_from_samples_iqr = get_percentiles(random_from_samples_v)
-
-
     
     fig, ax = plt.subplots()
     interval_list = np.array(interval_list) 
