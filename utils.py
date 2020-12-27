@@ -182,12 +182,6 @@ def mse_distortion(sample, codebook_dict):
     return min_cw_id, min_mse
 
 def gain_distortion(sample, codebook_dict):
-    """
-    Input: sample: a complex unitary vector with norm(sample) == 1;
-           codebook_dict: a dict of codewords. Each codeword is a unitary complex vector with norm(codeword) == 1. 
-    Output: codeword_id: uuid from codeword who produces the max_gain
-            max_gain: real-valued gain from cosine formula.
-    """
     max_gain = -np.Inf
     max_cw_id = None
     for cw_id, cw in codebook_dict.items():
