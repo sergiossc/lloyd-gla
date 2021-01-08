@@ -22,10 +22,12 @@ def norm(cw):
     return np.sqrt(squared_norm(cw))
 
 
-def gen_dftcodebook(num_of_cw):
-    tx_array = np.arange(num_of_cw)
+def gen_dftcodebook(num_of_cw, oversampling_factor=None):
+    if oversampling_factor is None:
+        oversampling_factor = 1
+    tx_array = np.arange(num_of_cw * oversampling_factor)
     mat = np.matrix(tx_array).T * tx_array
-    cb = np.exp(1j * 2 * np.pi * mat/num_of_cw)
+    cb = (1.0/np.sqrt(num_of_cw)) * np.exp(1j * 2 * np.pi * mat/(oversampling_factor * num_of_cw))
     return cb
     
 def richscatteringchnmtx(num_tx, num_rx, variance):
@@ -43,18 +45,29 @@ def richscatteringchnmtx(num_tx, num_rx, variance):
     #h = np.sqrt(sigma/2)*np.random.randn(num_tx, num_rx)
     return h
 
-def gen_samples(codebook, num_of_samples, variance, seed):
+def gen_samples(codebook, num_of_samples, variance, seed, nrows = None, ncols = None):
 
     np.random.seed(seed)
-
-    num_rows = np.shape(codebook)[0]
-    num_cols = np.shape(codebook)[1]
     samples = []
-    for n in range(int(num_of_samples/num_rows)):
-        for cw in codebook:
-            noise = np.sqrt(variance/(2*num_cols)) * (np.random.randn(1, num_cols) + np.random.randn(1, num_cols) * 1j)
-            sample = cw + noise
-            samples.append(sample)
+
+    if codebook is not None:
+        num_rows = np.shape(codebook)[0]
+        num_cols = np.shape(codebook)[1]
+        for n in range(int(num_of_samples/num_rows)):
+            for cw in codebook:
+                noise = np.sqrt(variance/(2*num_cols)) * (np.random.randn(1, num_cols) + np.random.randn(1, num_cols) * 1j)
+                sample = cw + noise
+                samples.append(sample)
+
+    elif codebook is None:
+        if (nrows and ncols) is not None:
+            cw = np.zeros((1, nrows * ncols), dtype=complex)
+            for n in range(num_of_samples):
+                noise = np.sqrt(variance/(2*ncols*nrows)) * (np.random.randn(1, nrows * ncols) + np.random.randn(1, nrows * ncols) * 1j)
+                sample = cw + noise
+                samples.append(sample)
+        else:
+            print ('Please, you shold give information about number of rows and cols of each samples.')
 
     np.random.seed(None)
 

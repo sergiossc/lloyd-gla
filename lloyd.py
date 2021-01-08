@@ -151,7 +151,6 @@ def create_submit_file(profile_pathfile):
         samples_random_seed = p['samples_random_seed']
         trial_random_seed = p['trial_random_seed']
     
-    
         #args = 'run_lloyd_gla(' + str(num_of_elements) + ', ' +  str(variance_of_samples) + ', \'' + str(initial_alphabet_opt) + '\', \'' + str(distortion_measure_opt) + '\', ' + str(num_of_samples) + ', ' + str(max_num_of_interactions) + ', \'' + str(results_dir) + '\', \'' + str(instance_id) + '\', ' + str(percentage_of_sub_samples) + ', ' + str(samples_random_seed) + ', ' + str(trial_random_seed) + ')'
         args += '\narguments = ' + str(num_of_elements) + ' ' +  str(variance_of_samples) + ' ' + str(initial_alphabet_opt) + ' ' + str(distortion_measure_opt) + ' ' + str(num_of_samples) + ' ' + str(max_num_of_interactions) + ' ' + str(results_dir) + ' ' + str(instance_id) + ' ' + str(percentage_of_sub_samples) + ' ' + str(samples_random_seed) + ' ' + str(trial_random_seed) + ' \nqueue'
 
@@ -190,8 +189,6 @@ def running_locally(profile_pathfile):
     use_same_samples_for_all = d['use_same_samples_for_all']
     percentage_of_sub_samples = d['percentage_of_sub_samples']
 
-    print ('OK')
-
     parms = []
     for n_elements in num_of_elements:
         for variance in variance_of_samples_values:
@@ -229,7 +226,6 @@ if __name__ == '__main__':
     my_group.add_argument('-l', '--running-locally', action='store_true', help='allows to run all trials locally on PC using python concurrents')
 
     my_parser.add_argument('-j', '--json-pathfile-result', metavar='path', type=str, help='the path to json file with some results of a trial')
-
     my_parser.add_argument('-p', '--profile-pathfile', metavar='path', type=str, help='the path to profile json file with general parameters')
 
     args = my_parser.parse_args()
@@ -278,7 +274,9 @@ if __name__ == '__main__':
             running_locally(args.profile_pathfile)
 
     else:
-        pass
+        #pass
+        print ('Use \'-h\' option to see available options')
+        sys.exit()
 
-    print(vars(args))
+    #print(vars(args))
     

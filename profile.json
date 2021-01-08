@@ -5,10 +5,10 @@
     "initial_alphabet_opts_available": ["katsavounidis", "xiaoxiao", "sa", "unitary_until_num_of_elements", "random_from_samples"],
     "distortion_measure_opts": ["mse"],
     "distortion_measure_opts_available": ["mse", "gain"],
-    "num_of_trials": 1,
+    "num_of_trials": 2,
     "num_of_samples": 80,
     "max_num_of_interactions": 1000,
-    "results_directory": "/home/users/sergiossc/current/lloyd-gla/results",
+    "results_directory": "/home/snow/github/land/lloyd-gla/results",
     "percentage_of_sub_samples": 1,
     "use_same_samples_for_all": true
 }
