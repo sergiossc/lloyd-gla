@@ -22,12 +22,12 @@ def norm(cw):
     return np.sqrt(squared_norm(cw))
 
 
-def gen_dftcodebook(num_of_cw, oversampling_factor=None):
-    if oversampling_factor is None:
-        oversampling_factor = 1
-    tx_array = np.arange(num_of_cw * oversampling_factor)
+def gen_dftcodebook(num_of_cw):
+    #tx_array = np.arange(num_of_cw * int(oversampling_factor))
+    tx_array = np.arange(num_of_cw)
     mat = np.matrix(tx_array).T * tx_array
-    cb = (1.0/np.sqrt(num_of_cw)) * np.exp(1j * 2 * np.pi * mat/(oversampling_factor * num_of_cw))
+    #cb = (1.0/np.sqrt(num_of_cw)) * np.exp(1j * 2 * np.pi * mat/(oversampling_factor * num_of_cw))
+    cb = np.exp(1j * 2 * np.pi * mat/num_of_cw)
     return cb
     
 def richscatteringchnmtx(num_tx, num_rx, variance):
@@ -51,11 +51,11 @@ def gen_samples(codebook, num_of_samples, variance, seed, nrows = None, ncols = 
     samples = []
 
     if codebook is not None:
-        num_rows = np.shape(codebook)[0]
-        num_cols = np.shape(codebook)[1]
-        for n in range(int(num_of_samples/num_rows)):
+        nrows = np.shape(codebook)[0]
+        ncols = np.shape(codebook)[1]
+        for n in range(int(num_of_samples/nrows)):
             for cw in codebook:
-                noise = np.sqrt(variance/(2*num_cols)) * (np.random.randn(1, num_cols) + np.random.randn(1, num_cols) * 1j)
+                noise = np.sqrt(variance/(2*ncols)) * (np.random.randn(1, ncols) + np.random.randn(1, ncols) * 1j)
                 sample = cw + noise
                 samples.append(sample)
 
@@ -67,7 +67,7 @@ def gen_samples(codebook, num_of_samples, variance, seed, nrows = None, ncols = 
                 sample = cw + noise
                 samples.append(sample)
         else:
-            print ('Please, you shold give information about number of rows and cols of each samples.')
+            print ('Please, you shold give information about number of rows and cols of samples.')
 
     np.random.seed(None)
 
@@ -198,7 +198,7 @@ def gain_distortion(sample, codebook_dict):
     max_gain = -np.Inf
     max_cw_id = None
     for cw_id, cw in codebook_dict.items():
-        gain = np.abs(np.inner(sample.conj(), cw))
+        gain = np.abs(np.inner(sample.conj(), cw)) ** 2
         if gain > max_gain:
             max_gain = gain
             max_cw_id = cw_id
@@ -475,6 +475,12 @@ def run_lloyd_gla(parm):
         data['initial_codebook'] = encode_codebook(matrix2dict(initial_codebook))
         lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, max_num_of_interactions, distortion_measure_opt, variance_of_samples, initial_codebook, percentage_of_sub_samples)
  
+    elif initial_alphabet_opt == 'random':
+        initial_codebook = np.array([samples[i] for i in np.random.choice(len(samples), num_of_levels, replace=False)])
+        #print (f'hhi: {initial_codebook.shape}')
+        data['initial_codebook'] = encode_codebook(matrix2dict(initial_codebook))
+        lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, max_num_of_interactions, distortion_measure_opt, variance_of_samples, initial_codebook, percentage_of_sub_samples)
+        
 
     ##plot_performance(mean_distortion_by_round, 'MSE as distortion', 'distortion.png')
 
@@ -524,6 +530,16 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
         #codebook = np.array(initial_codebook_from_samples)
         codebook = initial_codebook_from_samples
         num_of_rounds = 1 # for randomized initial alphabet method only one round is needed
+
+
+    elif initial_alphabet_opt == 'random':
+        print ('hiiii')
+        #initial_codebook_from_samples = [samples[i] for i in np.random.choice(len(samples), num_of_levels, replace=False)]
+        initial_codebook_from_samples = initial_codebook 
+        #codebook = np.array(initial_codebook_from_samples)
+        codebook = initial_codebook_from_samples
+        num_of_rounds = 1 # for randomized initial alphabet method only one round is needed
+
 
     elif initial_alphabet_opt == 'sa':
         #if initial_codebook.all() == None:
@@ -575,6 +591,8 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
             #samples_start = samples_start + p 
             #samples_end = samples_end + p
         elif initial_alphabet_opt == 'random_from_samples':
+            pass
+        elif initial_alphabet_opt == 'random':
             pass
         elif initial_alphabet_opt == 'sa':
             pass

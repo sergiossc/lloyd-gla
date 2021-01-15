@@ -1,7 +1,7 @@
 {
     "number_of_elements": [16],
     "variance_of_samples_values": [1.0],
-    "initial_alphabet_opts": ["katsavounidis", "xiaoxiao", "sa", "unitary_until_num_of_elements", "random_from_samples"],
+    "initial_alphabet_opts": ["katsavounidis", "xiaoxiao", "sa", "unitary_until_num_of_elements", "random_from_samples", "random"],
     "initial_alphabet_opts_available": ["katsavounidis", "xiaoxiao", "sa", "unitary_until_num_of_elements", "random_from_samples"],
     "distortion_measure_opts": ["mse"],
     "distortion_measure_opts_available": ["mse", "gain"],
