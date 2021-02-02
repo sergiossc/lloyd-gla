@@ -67,11 +67,33 @@ def gen_samples(codebook, num_of_samples, variance, seed, nrows = None, ncols = 
                 sample = cw + noise
                 samples.append(sample)
         else:
-            print ('Please, you shold give information about number of rows and cols of samples.')
+            #print ('Please, you shold give information about number of rows and cols of samples.')
+            raise ValueError("Please, you shold give information about number of 'rows' and 'cols' of samples.")
 
     np.random.seed(None)
 
     return np.array(samples)
+
+def covariance_matrix(samples):
+    """
+      https://handwiki.org/wiki/Complex_random_vector
+    """
+    mean = complex_average(samples)
+    de_meaned = np.array([sample - mean for sample in samples])
+    num_samples, num_rows, num_cols = de_meaned.shape
+    S = np.zeros((num_cols, num_cols), dtype=complex)
+    for col1 in range(num_cols):
+        for col2 in range(num_cols):
+            x = np.sum(de_meaned[:,:,col1].conj() * de_meaned[:,:,col2])/(num_samples-1)
+            S[col1, col2] = x
+            #if col1 == col2:
+            #    pass
+            #    #print (np.power(x, 2))
+    #print ("S:\n")
+    #for s in S:
+        #print (f's: {s}\n')
+    #print ("trace(S):\n", np.trace(S))
+    return S
 
 def complex_average(samples):
     return np.mean(samples, axis=0)
@@ -198,12 +220,24 @@ def gain_distortion(sample, codebook_dict):
     max_gain = -np.Inf
     max_cw_id = None
     for cw_id, cw in codebook_dict.items():
-        gain = np.abs(np.inner(sample.conj(), cw)) ** 2
+        #gain = np.abs(np.inner(cw.conj(), sample)) ** 2. This is the same of
+        prod = np.inner(cw.conj(), sample)
+        gain = np.inner(prod.conj(), prod)
         if gain > max_gain:
             max_gain = gain
             max_cw_id = cw_id
     return max_cw_id, max_gain
 
+def gain_codeword_derivation(codeword, samples):
+    #new_codeword = np.array([samples[i] for i in np.random.choice(len(samples), 1, replace=False)])
+    j_sum = 0.0
+    j_mean = 0.0
+    for sample in samples:
+        j = np.angle(2 * np.conjugate(np.inner(sample.conj(), sample)) * codeword)
+        j_sum = j_sum + j
+    j_mean = j_sum/len(samples)
+    new_codeword = np.exp(1j * j_mean)
+    return new_codeword
 
 def xiaoxiao_initial_codebook(samples):
 
@@ -272,7 +306,6 @@ def get_index_codewords_from_sub_samples(n_samples, n_codewords):
             start = n * slot
             mid = start + step
             index_codebook_list.append(int(mid))
-
     return index_codebook_list
 
 
@@ -533,7 +566,6 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
 
 
     elif initial_alphabet_opt == 'random':
-        print ('hiiii')
         #initial_codebook_from_samples = [samples[i] for i in np.random.choice(len(samples), num_of_levels, replace=False)]
         initial_codebook_from_samples = initial_codebook 
         #codebook = np.array(initial_codebook_from_samples)
@@ -576,7 +608,8 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
 
 
     else:
-        return None
+        #return None
+        raise ValueError("'initial alphabet opt' must be one of available opts")
 
     mean_distortion_by_round = {}
     current_codebook_dict = None
@@ -646,7 +679,18 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
                         if percentage_of_sub_samples is None:
                             percentage_of_sub_samples = 1 # Ex.: 0.8 is 80% of subsamples
                         end = int(len(sub_set_of_samples) * percentage_of_sub_samples)
-                        new_cw = complex_average(sub_set_of_samples_matrix[start:end])
+
+                        if distortion_measure == 'mse':
+                            new_cw = complex_average(sub_set_of_samples_matrix[start:end])
+
+                        elif distortion_measure == 'gain':
+                            #new_cw = gain_codeword_derivation(codebook_dict[cw_id], sub_set_of_samples_matrix[start:end])
+                            new_cw = complex_average(sub_set_of_samples_matrix[start:end])
+
+                        else:
+                            print ('Error: no distortion measure option chosen')
+                            exit()
+                            #pass
                     else:
                         new_cw = complex_average(dict2matrix(sub_set_of_samples))
       

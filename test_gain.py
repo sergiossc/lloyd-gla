@@ -11,7 +11,7 @@ from numpy.linalg import svd
 if __name__ == '__main__':
     print ('Precoding on perfect CSI - Maximum Ratio Combining (MRC)\n') 
 
-    n_tx = 1
+    n_tx = 16
     n_rx = 16
     
     print (f'# of TX elements: {n_tx}')
@@ -38,8 +38,8 @@ if __name__ == '__main__':
     instance_id = str(uuid.uuid4())
     print (f'instance_id: {instance_id}')
     percentage_of_sub_samples = 1
-    samples_random_seed = 987
-    trial_random_seed = 654
+    samples_random_seed = 98723
+    trial_random_seed = 65423
 
     p = {'num_of_elements': num_of_elements, 'variance_of_samples': variance_of_samples, 'initial_alphabet_opt':initial_alphabet_opt, 'distortion_measure_opt':distortion_measure_opt, 'num_of_samples':num_of_samples, 'max_num_of_interactions':max_num_of_interactions, 'results_dir': results_dir, 'instance_id': instance_id, 'percentage_of_sub_samples': percentage_of_sub_samples, 'samples_random_seed': samples_random_seed, 'trial_random_seed': trial_random_seed}
 
