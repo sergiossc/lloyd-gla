@@ -22,13 +22,19 @@ def norm(cw):
     return np.sqrt(squared_norm(cw))
 
 
-def gen_dftcodebook(num_of_cw):
-    #tx_array = np.arange(num_of_cw * int(oversampling_factor))
-    tx_array = np.arange(num_of_cw)
-    mat = np.matrix(tx_array).T * tx_array
-    #cb = (1.0/np.sqrt(num_of_cw)) * np.exp(1j * 2 * np.pi * mat/(oversampling_factor * num_of_cw))
-    cb = np.exp(1j * 2 * np.pi * mat/num_of_cw)
-    return cb
+def gen_dftcodebook(num_of_cw, oversampling_factor=None):
+    if oversampling_factor is not None:
+        tx_array = np.arange(num_of_cw * int(oversampling_factor))
+        mat = np.matrix(tx_array).T * tx_array
+        cb = (1.0/np.sqrt(num_of_cw)) * np.exp(1j * 2 * np.pi * mat/(oversampling_factor * num_of_cw))
+    elif oversampling_factor is None:
+        tx_array = np.arange(num_of_cw)
+        mat = np.matrix(tx_array).T * tx_array
+        cb =  (1.0/np.sqrt(num_of_cw)) * np.exp(1j * 2 * np.pi * mat/num_of_cw)
+    else:
+        raise(f'Please chose \'None\' or int value for oversampling_factor')
+
+    return cb[:, 0:num_of_cw]
     
 def richscatteringchnmtx(num_tx, num_rx, variance):
     """
@@ -220,9 +226,9 @@ def gain_distortion(sample, codebook_dict):
     max_gain = -np.Inf
     max_cw_id = None
     for cw_id, cw in codebook_dict.items():
-        #gain = np.abs(np.inner(cw.conj(), sample)) ** 2. This is the same of
-        prod = np.inner(cw.conj(), sample)
-        gain = np.inner(prod.conj(), prod)
+        gain = np.abs(np.inner(cw.conj(), sample)) ** 2 #This is the same of
+        #prod = np.inner(cw.conj(), sample)
+        #gain = np.inner(prod.conj(), prod)
         if gain > max_gain:
             max_gain = gain
             max_cw_id = cw_id
@@ -934,5 +940,4 @@ def get_percentiles(results_values):
     third_percentile = np.percentile(results_values, 75) 
     iqr = third_percentile - first_percentile
     return first_percentile, median, third_percentile, iqr
-
 
