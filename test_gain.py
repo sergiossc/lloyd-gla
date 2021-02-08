@@ -9,37 +9,28 @@ from numpy.linalg import svd
 
 
 if __name__ == '__main__':
-    print ('Precoding on perfect CSI - Maximum Ratio Combining (MRC)\n') 
+    print ('Precoding on perfect CSI - MRT\n') 
 
-    n_tx = 16
-    n_rx = 16
+    n_tx = 4
+    n_rx = 1
     
     print (f'# of TX elements: {n_tx}')
     print (f'# of RX elements: {n_rx}')
 
-    k = n_rx # codebook length. codeword number.
+    k = n_tx # codebook length. codeword number.
     
-    #dft_cb = gen_dftcodebook(k)
-
-    #cb = dft_cb
-    #num_of_samples = 4000
-    #variance = 1.0
-    #seed_samples = 987
-    #samples = gen_samples(cb, num_of_samples, variance, seed_samples)
-
-
-    num_of_elements = n_rx
+    num_of_elements = n_tx
     variance_of_samples = 1.0
     initial_alphabet_opt = 'random'
     distortion_measure_opt = 'gain'
-    num_of_samples = 4000
+    num_of_samples = 400
     max_num_of_interactions = 1000
     results_dir = '/home/snow/github/land/lloyd-gla/results'
     instance_id = str(uuid.uuid4())
     print (f'instance_id: {instance_id}')
     percentage_of_sub_samples = 1
-    samples_random_seed = 98723
-    trial_random_seed = 65423
+    samples_random_seed = np.random.choice(10000)
+    trial_random_seed = np.random.choice(10000)
 
     p = {'num_of_elements': num_of_elements, 'variance_of_samples': variance_of_samples, 'initial_alphabet_opt':initial_alphabet_opt, 'distortion_measure_opt':distortion_measure_opt, 'num_of_samples':num_of_samples, 'max_num_of_interactions':max_num_of_interactions, 'results_dir': results_dir, 'instance_id': instance_id, 'percentage_of_sub_samples': percentage_of_sub_samples, 'samples_random_seed': samples_random_seed, 'trial_random_seed': trial_random_seed}
 

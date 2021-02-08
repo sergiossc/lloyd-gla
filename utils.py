@@ -15,7 +15,10 @@ def squared_norm(cw):
     Input: cw as a vector (1-dim)
     Output: return a squared norm as a inner product of cw.conj() * cw
     """
-    inner_product = np.sum(cw.conj() * cw)
+    ##len_cw = cw.shape[0] * cw.shape[1]
+    ##cw = np.array(cw).reshape(len_cw)
+    inner_product = np.sum(cw.conj() * cw) 
+    #inner_product = np.inner(cw.conj(), cw)
     return inner_product
 
 def norm(cw): 
@@ -225,10 +228,13 @@ def mse_distortion(sample, codebook_dict):
 def gain_distortion(sample, codebook_dict):
     max_gain = -np.Inf
     max_cw_id = None
+    len_sample = sample.shape[0] * sample.shape[1]
+    sample = np.array(sample).reshape(len_sample)
     for cw_id, cw in codebook_dict.items():
-        gain = np.abs(np.inner(cw.conj(), sample)) ** 2 #This is the same of
-        #prod = np.inner(cw.conj(), sample)
-        #gain = np.inner(prod.conj(), prod)
+        cw = np.array(cw).reshape(len_sample)
+        #gain = np.abs(np.sum(cw * sample)) ** 2
+        sample = sample/norm(sample)
+        gain = np.cos(np.angle(np.sum(cw * sample.conj())))
         if gain > max_gain:
             max_gain = gain
             max_cw_id = cw_id
@@ -236,14 +242,48 @@ def gain_distortion(sample, codebook_dict):
 
 def gain_codeword_derivation(codeword, samples):
     #new_codeword = np.array([samples[i] for i in np.random.choice(len(samples), 1, replace=False)])
-    j_sum = 0.0
-    j_mean = 0.0
+    theta_sum = 0.0
+    theta_mean = 0.0
+
+    len_codeword = codeword.shape[0] * codeword.shape[1]
+    codeword = np.array(codeword).reshape(len_codeword)
+
+    t_sum = np.zeros(len_codeword)
+
     for sample in samples:
-        j = np.angle(2 * np.conjugate(np.inner(sample.conj(), sample)) * codeword)
-        j_sum = j_sum + j
-    j_mean = j_sum/len(samples)
-    new_codeword = np.exp(1j * j_mean)
-    return new_codeword
+        #theta = np.angle(2 * np.conjugate(np.inner(sample.conj(), sample)) * codeword)
+
+        len_sample = sample.shape[0] * sample.shape[1]
+        sample = np.array(sample).reshape(len_sample)
+
+        h2 = [sample[i].conj()*sample[i] for i in range(len_sample)]
+        h2 = np.array(h2)
+
+        t = [codeword[i]*h2[i] for i in range(len_sample)]
+        t = 2 * np.array(t)
+        t = np.angle(t)
+        
+        #print (f't.shape: {t.shape}')
+        #print (f'h2.shape: {h2.shape}')
+        #print (f'sample.shape: {sample.shape}')
+        #print (f'codeword.shape: {codeword.shape}')
+        
+        #theta_sum = theta_sum + theta
+        t_sum = t_sum + t
+    #theta_mean = theta_sum/len(samples)
+    t_mean = t_sum/len(samples)
+    #print (f't_mean.shape: {t_mean.shape}')
+    step_size = 0.001
+    #new_theta = np.angle(codeword) + step_size * theta_mean
+    new_t = np.angle(codeword) + step_size * t_mean
+    #new_codeword = np.exp(1j * new_theta)
+    new_cw = np.exp(1j * new_t)
+    #new_codeword = new_codeword/norm(new_codeword)
+    new_cw = new_cw/norm(new_cw)
+    new_cw = np.array(new_cw).reshape(1, len_codeword)
+    #print (f'new_cw.shape: {new_cw.shape}')
+    #return new_codeword
+    return new_cw
 
 def xiaoxiao_initial_codebook(samples):
 
@@ -393,7 +433,7 @@ def perform_distortion(sample, codebook_dict, metric):
     distortion_opts = {'mse': mse_distortion, 'gain': gain_distortion}
     distortion_function = distortion_opts.get(metric, None)
     cw_id, distortion = distortion_function(sample, codebook_dict)
-    return cw_id, np.abs(distortion)
+    return cw_id, distortion
 
 def sa(initial_codebook, variance_of_samples, initial_temperature, max_iteractions, lloyd_num_of_interactions, distortion_measure_opt, num_of_levels, samples):
     
@@ -469,15 +509,18 @@ def run_lloyd_gla(parm):
     data['max_num_of_interactions'] = max_num_of_interactions
     data['percentage_of_sub_samples'] = percentage_of_sub_samples
 
-    dftcodebook = gen_dftcodebook(num_of_elements)
-
-    data['dftcodebook'] = encode_codebook(matrix2dict(dftcodebook))
+    ##dftcodebook = gen_dftcodebook(num_of_elements)
+    dftcodebook = None
+    ncols = num_of_elements
+    nrows = 1 
+    ##data['dftcodebook'] = encode_codebook(matrix2dict(dftcodebook))
     
     # Here, the number of lloyd levels or reconstruction alphabet is equal to number of elements
     num_of_levels = num_of_elements
 
     # Creating samples
-    samples = gen_samples(dftcodebook, num_of_samples, variance_of_samples, samples_random_seed)
+    ##samples = gen_samples(dftcodebook, num_of_samples, variance_of_samples, samples_random_seed)
+    samples = gen_samples(dftcodebook, num_of_samples, variance_of_samples, samples_random_seed, nrows, ncols)
 
     # Controlling randomness from trial by seed to make possible reproduce it later
     np.random.seed(trial_random_seed)
@@ -515,8 +558,9 @@ def run_lloyd_gla(parm):
         lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, max_num_of_interactions, distortion_measure_opt, variance_of_samples, initial_codebook, percentage_of_sub_samples)
  
     elif initial_alphabet_opt == 'random':
-        initial_codebook = np.array([samples[i] for i in np.random.choice(len(samples), num_of_levels, replace=False)])
-        #print (f'hhi: {initial_codebook.shape}')
+        initial_codebook = np.array([samples[i]/norm(samples[i]) for i in np.random.choice(len(samples), num_of_levels, replace=False)])
+        initial_codebook = initial_codebook.conj()
+        #initial_codebook = gen_dftcodebook(num_of_elements)
         data['initial_codebook'] = encode_codebook(matrix2dict(initial_codebook))
         lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, max_num_of_interactions, distortion_measure_opt, variance_of_samples, initial_codebook, percentage_of_sub_samples)
         
@@ -572,10 +616,8 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
 
 
     elif initial_alphabet_opt == 'random':
-        #initial_codebook_from_samples = [samples[i] for i in np.random.choice(len(samples), num_of_levels, replace=False)]
-        initial_codebook_from_samples = initial_codebook 
-        #codebook = np.array(initial_codebook_from_samples)
-        codebook = initial_codebook_from_samples
+        #initial_codebook_from_samples = initial_codebook 
+        codebook = initial_codebook
         num_of_rounds = 1 # for randomized initial alphabet method only one round is needed
 
 
@@ -663,6 +705,7 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
                 sets[cw_id].append(sample_info)
             mean_distortion = distortion/len(samples) 
             mean_distortion_by_iteractions.append(mean_distortion)
+            #print (f'iter: {n}, mean_distortion: {mean_distortion}')
             if (n>0) and (mean_distortion_by_iteractions[n-1] == mean_distortion_by_iteractions[n]):
                 break
  
@@ -691,7 +734,11 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
 
                         elif distortion_measure == 'gain':
                             #new_cw = gain_codeword_derivation(codebook_dict[cw_id], sub_set_of_samples_matrix[start:end])
+                            #new_cw = complex_average(sub_set_of_samples_matrix[start:end])
+                            ##new_cw = gain_codeword_derivation(codebook_dict[cw_id], sub_set_of_samples_matrix[start:end])
                             new_cw = complex_average(sub_set_of_samples_matrix[start:end])
+                            new_cw = 1/np.sqrt(4) * np.exp(1j * np.angle(new_cw))
+                            ##new_cw = new_cw.conj()
 
                         else:
                             print ('Error: no distortion measure option chosen')
@@ -702,16 +749,15 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
       
                     new_cw = new_cw/norm(new_cw)
                 else:
-                    if initial_alphabet_opt == 'random_from_samples' or initial_alphabet_opt == 'sa' or initial_alphabet_opt == 'katsavounidis' or initial_alphabet_opt == 'xiaoxiao':
-                        #new_cw = codebook_dict[cw_id] # Enable this line to keep the cw who has 0 samples, but for a better design it should be removed from codebook.
+                    print (len(samples_info_list))
+                    if initial_alphabet_opt == 'random_from_samples' or initial_alphabet_opt == 'random' or initial_alphabet_opt == 'sa' or initial_alphabet_opt == 'katsavounidis' or initial_alphabet_opt == 'xiaoxiao':
                         new_cw_index = np.random.choice(len(samples))
                         new_cw = np.array(samples[new_cw_index]) # this is more interesting: if cw had groupped any sample, get another one from samples.
+                        new_cw = new_cw/norm(new_cw)
+
                     elif initial_alphabet_opt == 'unitary_until_num_of_elements':
-                        #new_cw_index = np.random.choice(len(samples))
-                        #new_cw = np.array(samples[new_cw_index]) # this is more interesting: if cw had groupped any sample, get another one from samples.
-                        #new_cw = codebook_dict[cw_id] # In this case, keep the same codeword. May there are a better solution... 
                         new_cw = np.array(cw0)
-                        #pass
+                        new_cw = new_cw/norm(new_cw)
 
                 new_codebook_dict[cw_id] = new_cw
             codebook = dict2matrix(new_codebook_dict)
