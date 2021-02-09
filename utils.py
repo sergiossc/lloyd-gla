@@ -233,7 +233,8 @@ def gain_distortion(sample, codebook_dict):
     for cw_id, cw in codebook_dict.items():
         cw = np.array(cw).reshape(len_sample)
         #gain = np.abs(np.sum(cw * sample)) ** 2
-        sample = sample/norm(sample)
+        #sample = sample/norm(sample)
+        #sample = sample/norm(sample)
         gain = np.cos(np.angle(np.sum(cw * sample.conj())))
         if gain > max_gain:
             max_gain = gain
@@ -332,9 +333,9 @@ def xiaoxiao_initial_codebook(samples):
 
 
     #igetting codewords from subgroups
-    list_initial_codebook_from_a_group = [samples_a_group_sorted[i] for i in index_a]
-    list_initial_codebook_from_b_group = [samples_b_group_sorted[i] for i in index_b]
-    list_initial_codebook_from_c_group = [samples_c_group_sorted[i] for i in index_c]
+    list_initial_codebook_from_a_group = [samples_a_group_sorted[i]/norm(samples_a_group_sorted[i]) for i in index_a]
+    list_initial_codebook_from_b_group = [samples_b_group_sorted[i]/norm(samples_b_group_sorted[i]) for i in index_b]
+    list_initial_codebook_from_c_group = [samples_c_group_sorted[i]/norm(samples_c_group_sorted[i]) for i in index_c]
 
     initial_codebook = np.array(list_initial_codebook_from_a_group + list_initial_codebook_from_b_group + list_initial_codebook_from_c_group)
 
@@ -424,7 +425,11 @@ def katsavounidis_initial_codebook(samples):
     
         initial_codebook[i+2,:,:] = samples_dict.pop(max_distance_sample_id)
 
-    return initial_codebook
+    initial_codebook_normalized = np.zeros((num_of_codewords, num_rows, num_cols), dtype=complex)
+    for i in range(num_of_codewords):
+        initial_codebook_normalized[i,:,:] = initial_codebook[i,:,:]/norm(initial_codebook[i,:,:]) 
+
+    return initial_codebook_normalized
  
 
 def perform_distortion(sample, codebook_dict, metric):
@@ -529,6 +534,8 @@ def run_lloyd_gla(parm):
     if initial_alphabet_opt == 'xiaoxiao':
 
         initial_codebook, samples_hadamard = xiaoxiao_initial_codebook(samples)
+        #for cw in initial_codebook:
+        #    print (f'norm(cw): {norm(cw)}')
         #samples = samples_hadamard
         data['initial_codebook'] = encode_codebook(matrix2dict(initial_codebook))
         lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, max_num_of_interactions, distortion_measure_opt, None, initial_codebook, None)
@@ -537,11 +544,13 @@ def run_lloyd_gla(parm):
     elif initial_alphabet_opt == 'katsavounidis':
 
         initial_codebook = katsavounidis_initial_codebook(samples)
+        #for cw in initial_codebook:
+        #    print (f'norm(cw): {norm(cw)}')
         data['initial_codebook'] = encode_codebook(matrix2dict(initial_codebook))
         lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, max_num_of_interactions, distortion_measure_opt, None, initial_codebook, None)
 
     elif initial_alphabet_opt == 'sa':
-        initial_codebook = np.array([samples[i] for i in np.random.choice(len(samples), num_of_levels, replace=False)])
+        initial_codebook = np.array([samples[i]/norm(samples[i]) for i in np.random.choice(len(samples), num_of_levels, replace=False)])
         data['initial_codebook'] = encode_codebook(matrix2dict(initial_codebook))
         initial_temperature = 10
         sa_max_num_of_iteractions = 20
@@ -549,26 +558,34 @@ def run_lloyd_gla(parm):
 
     elif initial_alphabet_opt == 'unitary_until_num_of_elements':
         initial_codebook = complex_average(samples)
+        initial_codebook = initial_codebook/norm(initial_codebook)
         data['initial_codebook'] = encode_codebook(matrix2dict(initial_codebook))
         lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, max_num_of_interactions, distortion_measure_opt, variance_of_samples, initial_codebook, percentage_of_sub_samples)
 
     elif initial_alphabet_opt == 'random_from_samples':
-        initial_codebook = np.array([samples[i] for i in np.random.choice(len(samples), num_of_levels, replace=False)])
+        initial_codebook = np.array([samples[i]/norm(samples[i]) for i in np.random.choice(len(samples), num_of_levels, replace=False)])
+        #for cw in initial_codebook:
+        #    print (f'norm(cw): {norm(cw)}')
         data['initial_codebook'] = encode_codebook(matrix2dict(initial_codebook))
         lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, max_num_of_interactions, distortion_measure_opt, variance_of_samples, initial_codebook, percentage_of_sub_samples)
  
     elif initial_alphabet_opt == 'random':
-        initial_codebook = np.array([samples[i]/norm(samples[i]) for i in np.random.choice(len(samples), num_of_levels, replace=False)])
-        initial_codebook = initial_codebook.conj()
+        angle_range = np.linspace(0, 2*np.pi, 360)
+        initial_codebook = 1/np.sqrt(num_of_elements) *  np.exp(1j * np.random.choice(angle_range, (num_of_levels, num_of_elements), replace=False))
+        #for cw in initial_codebook:
+        #    print (f'norm(cw): {norm(cw)}')
+        #initial_codebook = np.array([samples[i]/norm(samples[i]) for i in np.random.choice(len(samples), num_of_levels, replace=False)])
+        #if distortion_measure_opt == 'gain':
+        #initial_codebook = initial_codebook.conj()
         #initial_codebook = gen_dftcodebook(num_of_elements)
         data['initial_codebook'] = encode_codebook(matrix2dict(initial_codebook))
         lloydcodebook, sets, mean_distortion_by_round = lloyd_gla(initial_alphabet_opt, samples, num_of_levels, max_num_of_interactions, distortion_measure_opt, variance_of_samples, initial_codebook, percentage_of_sub_samples)
         
 
+    data['final_lloydcodebook'] = encode_codebook(matrix2dict(lloydcodebook))
     ##plot_performance(mean_distortion_by_round, 'MSE as distortion', 'distortion.png')
-
-    # Saving results in JSON file 
-    data['lloydcodebook'] = encode_codebook(matrix2dict(lloydcodebook))
+    lloydcodebook = 1/np.sqrt(num_of_elements) * np.exp(1j * np.angle(lloydcodebook))
+    data['egt_lloydcodebook'] = encode_codebook(matrix2dict(lloydcodebook))
     data['sets'] = encode_sets(sets)
     data['mean_distortion_by_round'] = encode_mean_distortion(mean_distortion_by_round)
 
@@ -731,13 +748,25 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
 
                         if distortion_measure == 'mse':
                             new_cw = complex_average(sub_set_of_samples_matrix[start:end])
+                            new_cw = new_cw/norm(new_cw) #complex_average(sub_set_of_samples_matrix[start:end])
 
                         elif distortion_measure == 'gain':
                             #new_cw = gain_codeword_derivation(codebook_dict[cw_id], sub_set_of_samples_matrix[start:end])
                             #new_cw = complex_average(sub_set_of_samples_matrix[start:end])
                             ##new_cw = gain_codeword_derivation(codebook_dict[cw_id], sub_set_of_samples_matrix[start:end])
                             new_cw = complex_average(sub_set_of_samples_matrix[start:end])
-                            new_cw = 1/np.sqrt(4) * np.exp(1j * np.angle(new_cw))
+                            new_cw = new_cw/norm(new_cw) #complex_average(sub_set_of_samples_matrix[start:end])
+                             
+                            #len_new_cw = new_cw.shape[0] * new_cw.shape[1]
+                            #new_cw = 1/np.sqrt(len_new_cw) * np.exp(1j * np.angle(new_cw))
+
+                            #my_set = sub_set_of_samples_matrix[start:end]
+                            #my_theta = np.zeros((1, len_new_cw))
+                            #for m_s in my_set:
+                            #    my_theta += np.angle(m_s)
+                            #mean_my_theta = my_theta/len_new_cw
+                            #new_cw = 1/np.sqrt(len_new_cw) * np.exp(1j * mean_my_theta)
+                            #print (f'my_theta: {my_theta/len_new_cw}')
                             ##new_cw = new_cw.conj()
 
                         else:

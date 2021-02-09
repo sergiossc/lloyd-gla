@@ -21,8 +21,8 @@ if __name__ == '__main__':
     
     num_of_elements = n_tx
     variance_of_samples = 1.0
-    initial_alphabet_opt = 'katsavounidis'
-    distortion_measure_opt = 'gain'
+    initial_alphabet_opt = 'xiaoxiao'
+    distortion_measure_opt = 'mse'
     num_of_samples = 40
     max_num_of_interactions = 1000
     results_dir = '/home/snow/github/land/lloyd-gla/results'
