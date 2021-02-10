@@ -11,7 +11,7 @@ from numpy.linalg import svd
 if __name__ == '__main__':
     print ('Precoding on perfect CSI - MRT\n') 
 
-    n_tx = 4
+    n_tx = 16
     n_rx = 1
     
     print (f'# of TX elements: {n_tx}')
@@ -21,9 +21,9 @@ if __name__ == '__main__':
     
     num_of_elements = n_tx
     variance_of_samples = 1.0
-    initial_alphabet_opt = 'xiaoxiao'
+    initial_alphabet_opt = 'random'
     distortion_measure_opt = 'mse'
-    num_of_samples = 40
+    num_of_samples = 1600
     max_num_of_interactions = 1000
     results_dir = '/home/snow/github/land/lloyd-gla/results'
     instance_id = str(uuid.uuid4())
