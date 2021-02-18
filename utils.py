@@ -15,8 +15,8 @@ def squared_norm(cw):
     Input: cw as a vector (1-dim)
     Output: return a squared norm as a inner product of cw.conj() * cw
     """
-    ##len_cw = cw.shape[0] * cw.shape[1]
-    ##cw = np.array(cw).reshape(len_cw)
+    len_cw = cw.shape[0] * cw.shape[1]
+    cw = np.array(cw).reshape(len_cw)
     inner_product = np.sum(cw.conj() * cw) 
     #inner_product = np.inner(cw.conj(), cw)
     return inner_product
@@ -112,6 +112,8 @@ def duplicate_codebook(codebook, perturbation_vector):
     for cw in codebook:
         cw1 = cw + perturbation_vector
         cw2 = cw - perturbation_vector
+        cw1 = cw1/norm(cw1)
+        cw2 = cw2/norm(cw2)
         new_codebook.append(cw1)
         new_codebook.append(cw2)
     return np.array(new_codebook)
@@ -155,8 +157,6 @@ def sorted_samples(samples, attr='norm'):
         s_sorted = sorted(s_not_sorted, key=lambda k: k['s_mse'])
         samples_sorted = [v['s'] for v in s_sorted]
         attr_sorted = [v['s_mse'] for v in s_sorted]
-
-
 
     elif attr == 'stddev':  #Sorted by Standard Deviation
 
@@ -778,10 +778,11 @@ def lloyd_gla(initial_alphabet_opt, samples, num_of_levels, num_of_iteractions, 
       
                     new_cw = new_cw/norm(new_cw)
                 else:
+                    print (f'initial_alphabet_opt: {initial_alphabet_opt}')
                     print (len(samples_info_list))
                     if initial_alphabet_opt == 'random_from_samples' or initial_alphabet_opt == 'random' or initial_alphabet_opt == 'sa' or initial_alphabet_opt == 'katsavounidis' or initial_alphabet_opt == 'xiaoxiao':
                         new_cw_index = np.random.choice(len(samples))
-                        new_cw = np.array(samples[new_cw_index]) # this is more interesting: if cw had groupped any sample, get another one from samples.
+                        new_cw = np.array(samples[new_cw_index]) # 
                         new_cw = new_cw/norm(new_cw)
 
                     elif initial_alphabet_opt == 'unitary_until_num_of_elements':
