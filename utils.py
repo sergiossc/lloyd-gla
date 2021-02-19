@@ -571,7 +571,7 @@ def run_lloyd_gla(parm):
  
     elif initial_alphabet_opt == 'random':
         angle_range = np.linspace(0, 2*np.pi, 360)
-        initial_codebook = 1/np.sqrt(num_of_elements) *  np.exp(1j * np.random.choice(angle_range, (num_of_levels, num_of_elements), replace=False))
+        initial_codebook = 1/np.sqrt(num_of_elements) *  np.exp(1j * np.random.choice(angle_range, (num_of_levels, num_of_elements), replace=True))
         #for cw in initial_codebook:
         #    print (f'norm(cw): {norm(cw)}')
         #initial_codebook = np.array([samples[i]/norm(samples[i]) for i in np.random.choice(len(samples), num_of_levels, replace=False)])
