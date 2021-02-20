@@ -48,145 +48,78 @@ if __name__ == '__main__':
     print ('# of json files: ', len(pathfiles))
     # From here it is going to open each json file to see each parameters and data from algorithm perform. May you should to implement some decode or transate functions to deal with json data from files to python data format. There are some decode functions on utils library. 
     #trial_result = (initial_alphabet_opt, distortion_measure_opt, num_of_levels, variance_of_samples, norm)
+    list_of_elements = [4, 8, 16, 32, 64]
 
-    occurences = []
-    samples_random_seeds = {}
+    for n in list_of_elements:
 
-    katsavounidis_results = {}
-    xiaoxiao_results = {}
-    unitary_until_num_of_elements_results = {}
-    random_from_samples_results = {}
-    sa_results = {}
-
-    for pathfile_id, pathfile in pathfiles.items():
-        with open(pathfile) as result:
-            data = result.read()
-            d = json.loads(data)
-
-        # May you edit from right here! Tip: Read *json file in results to decide how to deal from here.
-        initial_alphabet_opt = d['initial_alphabet_opt']
-        variance_of_samples = d['variance_of_samples']
-        distortion_measure_opt = d['distortion_measure_opt']
-        initial_alphabet_opt = d['initial_alphabet_opt']
-        num_of_elements = d['num_of_elements']
-        num_of_levels = num_of_elements 
-        num_of_samples = d['num_of_samples']
-        samples_random_seed = d['samples_random_seed']
-        mean_distortion_by_round = d['mean_distortion_by_round']
-
-        #normal_vector = np.ones(num_of_levels) * (num_of_samples/num_of_levels)
-        #sets = d['sets']
-        #set_vector = []
-        #for k, v in sets.items():
-        #    set_vector.append(v)
-        #set_vector = np.array(set_vector)
-   
-        #norm =  np.sqrt(np.sum(np.power(np.abs(set_vector - normal_vector), 2)))
-        #if norm == 0 and num_of_elements == 9 and variance_of_samples == 1.0 and initial_alphabet_method == 'katsavounidis': 
-        #if  norm == 0 and num_of_elements == 4 and variance_of_samples == 0.1 and initial_alphabet_method == 'katsavounidis'
-        #if  variance_of_samples == 0.1 and num_of_elements == 4 and initial_alphabet_opt == 'katsavounidis':
-            #trial_info = {'norm': norm}
-            #occurences.append(trial_info)
-        #if  num_of_elements == 4:
-        samples_random_seeds[int(samples_random_seed)] = 1
-
-        if initial_alphabet_opt == 'katsavounidis' and distortion_measure_opt == 'mse':
-            last_k = ''
-            for k in mean_distortion_by_round.keys():
-                last_k = k
-            mean_distortion_by_round_list = decode_mean_distortion(mean_distortion_by_round[last_k])
-            katsavounidis_results[str(int(samples_random_seed))] = mean_distortion_by_round_list[-1] 
-
-        if initial_alphabet_opt == 'xiaoxiao' and distortion_measure_opt == 'mse':
-            last_k = ''
-            for k in mean_distortion_by_round.keys():
-                last_k = k
-            mean_distortion_by_round_list = decode_mean_distortion(mean_distortion_by_round[last_k])
-            xiaoxiao_results[str(int(samples_random_seed))] = mean_distortion_by_round_list[-1] 
-
-        if initial_alphabet_opt == 'sa' and distortion_measure_opt == 'mse':
-            last_k = ''
-            for k in mean_distortion_by_round.keys():
-                last_k = k
-            mean_distortion_by_round_list = decode_mean_distortion(mean_distortion_by_round[last_k])
-            sa_results[str(int(samples_random_seed))] = mean_distortion_by_round_list[-1] 
-
-
-        if initial_alphabet_opt == 'unitary_until_num_of_elements' and distortion_measure_opt == 'mse':
-            last_k = ''
-            for k in mean_distortion_by_round.keys():
-                last_k = k
-            mean_distortion_by_round_list = decode_mean_distortion(mean_distortion_by_round[last_k])
-            unitary_until_num_of_elements_results[str(int(samples_random_seed))] = mean_distortion_by_round_list[-1] 
-
-
-        if initial_alphabet_opt == 'random_from_samples' and distortion_measure_opt == 'mse':
-            last_k = ''
-            for k in mean_distortion_by_round.keys():
-                last_k = k
-            mean_distortion_by_round_list = decode_mean_distortion(mean_distortion_by_round[last_k])
-            random_from_samples_results[str(int(samples_random_seed))] = mean_distortion_by_round_list[-1] 
-
-
-        occurences.append(1)
-
-    print(len(occurences))
-
-
-    samples_random_seeds = samples_random_seeds.items()
-    samples_random_seeds_k = np.array([str(k[0]) for k in sorted(samples_random_seeds)])
-
-    labels = samples_random_seeds_k
-
-    katsavounidis_results = katsavounidis_results.items()
-    katsavounidis_v = np.array([float(v[1]) for v in sorted(katsavounidis_results)])
-
-    xiaoxiao_results = xiaoxiao_results.items()
-    xiaoxiao_v = np.array([float(v[1]) for v in sorted(xiaoxiao_results)])
-
-    sa_results = sa_results.items()
-    sa_v = np.array([float(v[1]) for v in sorted(sa_results)])
-
-    unitary_until_num_of_elements_results = unitary_until_num_of_elements_results.items()
-    unitary_until_num_of_elements_v = np.array([float(v[1]) for v in sorted(unitary_until_num_of_elements_results)])
-
-    random_from_samples_results = random_from_samples_results.items()
-    random_from_samples_v = np.array([float(v[1]) for v in sorted(random_from_samples_results)])
-
-    x = np.arange(len(labels))
-    width = 0.1
+        occurences = []
+        samples_random_seeds = {}
     
-    fig, ax = plt.subplots()
-
-    rects1 = ax.bar(x + width, katsavounidis_v, width, label='katsavounidis')
-    rects2 = ax.bar(x + 2 * width, xiaoxiao_v, width, label='xiaoxiao')
-    rects3 = ax.bar(x + 3 * width, sa_v, width, label='sa')
-    rects4 = ax.bar(x + 4 * width, unitary_until_num_of_elements_v, width, label='unitary')
-    rects5 = ax.bar(x + 5 * width, random_from_samples_v, width, label='random')
-
-
-    ax.set_ylabel('Minimal distortion')
-    ax.set_xlabel('Seed samples from trials')
-    ax.set_title('Minimal distortion by initial alphabet method - Nt = 16, k = 8000, var = 1.0')
-    ax.set_xticks(x)
-    #ax.set_xticklabels(labels)
-    ax.set_xticklabels(x)
-    ax.legend()
-
-    plt.show()
-
-    #print (sorted(random_from_samples_results))
-
-    ##norm_values_array_l1 = np.array(sorted(norm_values_l1, key=lambda k: k['norm'], reverse=True))
-    #norm_values_array_l1 = np.array([v['norm'] for v in norm_values_l1])
-    #norm_values_array_l1 = norm_values_array_l1/np.sqrt((np.sum(np.power(norm_values_array_l1, 2))))
-    #plt.plot(norm_values_array_l1, 'r*', label='variance = 0.1')
-
-    ##norm_values_array_l2 = np.array(sorted(norm_values_l2, key=lambda k: k['norm'], reverse=True))
-    #norm_values_array_l2 = np.array([v['norm'] for v in norm_values_l2])
-    #norm_values_array_l2 = norm_values_array_l2/np.sqrt((np.sum(np.power(norm_values_array_l2, 2))))
-    #plt.plot(xiaoxiao_v, '-', label='xiaoxiao_v')
-
-
-
-    #plt.savefig('results_graph1.png')
+        katsavounidis_results = []
+        xiaoxiao_results = []
+        unitary_until_num_of_elements_results = []
+        random_from_samples_results = []
+        sa_results = []
+        random_results = []
+    
+        for pathfile_id, pathfile in pathfiles.items():
+            with open(pathfile) as result:
+                data = result.read()
+                d = json.loads(data)
+    
+            # May you edit from right here! Tip: Read *json file in results to decide how to deal from here.
+            initial_alphabet_opt = d['initial_alphabet_opt']
+            variance_of_samples = d['variance_of_samples']
+            distortion_measure_opt = d['distortion_measure_opt']
+            initial_alphabet_opt = d['initial_alphabet_opt']
+            num_of_elements = d['num_of_elements']
+            num_of_levels = num_of_elements 
+            num_of_samples = d['num_of_samples']
+            samples_random_seed = d['samples_random_seed']
+            mean_distortion_by_round = d['mean_distortion_by_round']
+    
+            #normal_vector = np.ones(num_of_levels) * (num_of_samples/num_of_levels)
+            #sets = d['sets']
+            #set_vector = []
+            #for k, v in sets.items():
+            #    set_vector.append(v)
+            #set_vector = np.array(set_vector)
+       
+            #norm =  np.sqrt(np.sum(np.power(np.abs(set_vector - normal_vector), 2)))
+            #if norm == 0 and num_of_elements == 9 and variance_of_samples == 1.0 and initial_alphabet_method == 'katsavounidis': 
+            #if  norm == 0 and num_of_elements == 4 and variance_of_samples == 0.1 and initial_alphabet_method == 'katsavounidis'
+            #if  variance_of_samples == 0.1 and num_of_elements == 4 and initial_alphabet_opt == 'katsavounidis':
+                #trial_info = {'norm': norm}
+                #occurences.append(trial_info)
+            #if  num_of_elements == 4:
+            samples_random_seeds[int(samples_random_seed)] = 1
+    
+            if initial_alphabet_opt == 'katsavounidis' and num_of_elements == n:
+                katsavounidis_results.append(pathfile)
+    
+            if initial_alphabet_opt == 'xiaoxiao' and num_of_elements == n:
+                xiaoxiao_results.append(pathfile)
+    
+            if initial_alphabet_opt == 'sa' and num_of_elements == n:
+                sa_results.append(pathfile)
+    
+            if initial_alphabet_opt == 'unitary_until_num_of_elements' and num_of_elements == n:
+                unitary_until_num_of_elements_results.append(pathfile)
+    
+            if initial_alphabet_opt == 'random_from_samples' and num_of_elements == n:
+                random_from_samples_results.append(pathfile)
+    
+            if initial_alphabet_opt == 'random' and num_of_elements == n:
+                random_results.append(pathfile)
+    
+            occurences.append(1)
+    
+        print(f'******************************************')
+        print(f'n-value: {n}')
+        print(f'All occurences length: {len(occurences)}')
+        print(f'katsavounidis_results length: {len(katsavounidis_results)}')
+        print(f'xiaoxiao_results length: {len(xiaoxiao_results)}')
+        print(f'sa_results length: {len(sa_results)}')
+        print(f'unitary_until_num_of_elements_results length: {len(unitary_until_num_of_elements_results)}')
+        print(f'random_from_samples_results length: {len(random_from_samples_results)}')
+        print(f'random_results length: {len(random_results)}')
